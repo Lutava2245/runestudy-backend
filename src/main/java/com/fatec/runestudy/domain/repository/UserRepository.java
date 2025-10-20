@@ -10,12 +10,12 @@ import com.fatec.runestudy.domain.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    boolean existsByNickname(String nickname);
-
-    boolean existsByEmail(String email);
+    boolean existsByEmailOrNickname(String email, String nickname);
 
     Optional<User> findByNickname(String nickname);
 
     Optional<User> findByEmail(String email);
+    
+    Optional<User> findByEmailOrNickname(String email, String nickname);
     
 }
