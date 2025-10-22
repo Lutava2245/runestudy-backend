@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.fatec.runestudy.domain.dto.ChangePasswordDTO;
 import com.fatec.runestudy.domain.dto.UserCreateDTO;
 import com.fatec.runestudy.domain.dto.UserResponseDTO;
 import com.fatec.runestudy.domain.dto.UserUpdateDTO;
@@ -99,6 +100,39 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
         return convertToDTO(user);
+    }
+
+    @Override
+    public boolean changePasswordById(Long id, ChangePasswordDTO requestDTO) {
+        if (!userRepository.existsById(id)) {
+            return false;
+        }
+
+        User user = userRepository.findById(id).orElse(null);
+
+        if (!passwordEncoder.matches(requestDTO.getCurrentPassword(), user.getPassword())) {
+            return false;
+        }
+        if (requestDTO.getCurrentPassword().equals(requestDTO.getNewPassword())) {
+            return false;
+        }
+
+        String newPassword = requestDTO.getNewPassword();
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        userRepository.save(user);
+        return true;
+    }
+
+    @Override
+    public boolean deleteUserById(Long id) {
+        if (!userRepository.existsById(id)) {
+            return false;
+        }
+
+        User user = userRepository.findById(id).orElse(null);
+        userRepository.delete(user);
+        return true;
     }
     
 }

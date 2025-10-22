@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.fatec.runestudy.domain.dto.ChangePasswordDTO;
 import com.fatec.runestudy.domain.dto.UserCreateDTO;
 import com.fatec.runestudy.domain.dto.UserResponseDTO;
 import com.fatec.runestudy.domain.dto.UserUpdateDTO;
@@ -21,5 +22,9 @@ public interface UserService {
     UserResponseDTO createUser(UserCreateDTO requestDTO);
 
     UserResponseDTO updateUserById(Long id, UserUpdateDTO requestDTO);
+
+    boolean changePasswordById(Long id, ChangePasswordDTO requestDTO);
+
+    boolean deleteUserById(Long id);
 
 }
