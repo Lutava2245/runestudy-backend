@@ -1,16 +1,5 @@
 package com.fatec.runestudy.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.fatec.runestudy.domain.dto.ChangePasswordDTO;
-import com.fatec.runestudy.domain.dto.UserCreateDTO;
-import com.fatec.runestudy.domain.dto.UserResponseDTO;
-import com.fatec.runestudy.domain.dto.UserUpdateDTO;
-import com.fatec.runestudy.domain.model.User;
-import com.fatec.runestudy.service.UserService;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +10,18 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.fatec.runestudy.domain.dto.ChangePasswordDTO;
+import com.fatec.runestudy.domain.dto.UserCreateDTO;
+import com.fatec.runestudy.domain.dto.UserResponseDTO;
+import com.fatec.runestudy.domain.dto.UserUpdateDTO;
+import com.fatec.runestudy.domain.model.User;
+import com.fatec.runestudy.service.UserService;
 
 @RestController
 @RequestMapping("api/users")
@@ -42,14 +40,13 @@ public class UserController {
     }
 
     @GetMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     public ResponseEntity<UserResponseDTO> getUser(@RequestParam Long id) {
         UserResponseDTO user = userService.getById(id);
         return user != null
             ? ResponseEntity.ok(user)
             : ResponseEntity.notFound().build();
     }
-    
     
     @PostMapping("register")
     public ResponseEntity<UserResponseDTO> registerUser(@RequestBody UserCreateDTO requestDTO) {
@@ -59,8 +56,8 @@ public class UserController {
             : ResponseEntity.badRequest().build();
     }
     
-    @PutMapping("edit/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PutMapping("{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     public ResponseEntity<UserResponseDTO> editUser(@RequestBody UserUpdateDTO requestDTO, @RequestParam Long id) {
         UserResponseDTO user = userService.updateUserById(id, requestDTO);
         return user != null
@@ -68,15 +65,15 @@ public class UserController {
             : ResponseEntity.badRequest().build();
     }
 
-    @PatchMapping("password")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordDTO requestDTO, @AuthenticationPrincipal User user) {
-        return userService.changePasswordById(user.getId(), requestDTO)
+    @PatchMapping("{id}/password")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
+    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordDTO requestDTO, @RequestParam Long id, @AuthenticationPrincipal User user) {
+        return userService.changePasswordById(user, id, requestDTO)
             ? ResponseEntity.noContent().build()
             : ResponseEntity.badRequest().build();
     }
 
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@RequestParam Long id) {
         return userService.deleteUserById(id)

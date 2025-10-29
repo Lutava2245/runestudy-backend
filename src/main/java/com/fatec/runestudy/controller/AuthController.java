@@ -22,10 +22,10 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    record LoginRequest(String username, String password) {}
-    record LoginResponse(String jwtToken) {}
+    public record LoginRequest(String username, String password) {}
+    public record LoginResponse(String jwtToken) {}
 
-    @PostMapping("/login")
+    @PostMapping("login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -33,7 +33,6 @@ public class AuthController {
                 loginRequest.password()
             )
         );
-
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String jwt = jwtUtil.generateToken(userDetails);
