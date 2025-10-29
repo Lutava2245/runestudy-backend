@@ -8,7 +8,6 @@ import lombok.Data;
 public class ChangePasswordDTO {
     
     @Valid
-    @NotBlank
     private String currentPassword;
 
     @Valid

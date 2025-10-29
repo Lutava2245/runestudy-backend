@@ -1,7 +1,7 @@
 package com.fatec.runestudy.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
         user.setNickname(requestDTO.getNickname());
         user.setEmail(requestDTO.getEmail());
         user.setPassword(hashedPassword);
-        user.setRoles(new HashSet<>(Arrays.asList(userRole)));
+        user.setRoles(new HashSet<>(Collections.singletonList(userRole)));
 
         userRepository.save(user);
         return convertToDTO(user);
@@ -103,20 +103,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean changePasswordById(Long id, ChangePasswordDTO requestDTO) {
+    public boolean changePasswordById(User authenticatedUser, Long id, ChangePasswordDTO requestDTO) {
         if (!userRepository.existsById(id)) {
             return false;
         }
 
         User user = userRepository.findById(id).orElse(null);
 
-        if (!passwordEncoder.matches(requestDTO.getCurrentPassword(), user.getPassword())) {
+        if (user.equals(authenticatedUser)) {
+            if (!passwordEncoder.matches(requestDTO.getCurrentPassword(), user.getPassword())) {
+                return false;
+            }
+            if (requestDTO.getCurrentPassword().equals(requestDTO.getNewPassword())) {
+                return false;
+            }
+    
+        } else if (!authenticatedUser.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             return false;
         }
-        if (requestDTO.getCurrentPassword().equals(requestDTO.getNewPassword())) {
-            return false;
-        }
-
+        
         String newPassword = requestDTO.getNewPassword();
         user.setPassword(passwordEncoder.encode(newPassword));
 

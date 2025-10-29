@@ -23,7 +23,7 @@ public interface UserService {
 
     UserResponseDTO updateUserById(Long id, UserUpdateDTO requestDTO);
 
-    boolean changePasswordById(Long id, ChangePasswordDTO requestDTO);
+    boolean changePasswordById(User authenticatedUser, Long id, ChangePasswordDTO requestDTO);
 
     boolean deleteUserById(Long id);
 
