@@ -94,6 +94,11 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = userRepository.findById(id).orElse(null);
+
+        if (userRepository.existsByEmailOrNickname(requestDTO.getEmail(), requestDTO.getNickname())) {
+            return null;
+        }
+        
         user.setName(requestDTO.getName());
         user.setNickname(requestDTO.getNickname());
         user.setEmail(requestDTO.getEmail());
@@ -109,8 +114,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = userRepository.findById(id).orElse(null);
-
-        if (user.equals(authenticatedUser)) {
+        if (user.getUsername().equals(authenticatedUser.getUsername())) {
             if (!passwordEncoder.matches(requestDTO.getCurrentPassword(), user.getPassword())) {
                 return false;
             }

@@ -9,11 +9,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fatec.runestudy.domain.dto.ChangePasswordDTO;
@@ -41,7 +41,7 @@ public class UserController {
 
     @GetMapping("{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
-    public ResponseEntity<UserResponseDTO> getUser(@RequestParam Long id) {
+    public ResponseEntity<UserResponseDTO> getUser(@PathVariable Long id) {
         UserResponseDTO user = userService.getById(id);
         return user != null
             ? ResponseEntity.ok(user)
@@ -58,7 +58,7 @@ public class UserController {
     
     @PutMapping("{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
-    public ResponseEntity<UserResponseDTO> editUser(@RequestBody UserUpdateDTO requestDTO, @RequestParam Long id) {
+    public ResponseEntity<UserResponseDTO> editUser(@RequestBody UserUpdateDTO requestDTO, @PathVariable Long id) {
         UserResponseDTO user = userService.updateUserById(id, requestDTO);
         return user != null
             ? ResponseEntity.ok(user)
@@ -67,7 +67,7 @@ public class UserController {
 
     @PatchMapping("{id}/password")
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
-    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordDTO requestDTO, @RequestParam Long id, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordDTO requestDTO, @PathVariable Long id, @AuthenticationPrincipal User user) {
         return userService.changePasswordById(user, id, requestDTO)
             ? ResponseEntity.noContent().build()
             : ResponseEntity.badRequest().build();
@@ -75,7 +75,7 @@ public class UserController {
 
     @DeleteMapping("{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteUser(@RequestParam Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         return userService.deleteUserById(id)
             ? ResponseEntity.noContent().build()
             : ResponseEntity.notFound().build();
