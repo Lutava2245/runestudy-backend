@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import com.fatec.runestudy.domain.dto.ChangeSkillDTO;
 import com.fatec.runestudy.domain.dto.TaskRequestDTO;
 import com.fatec.runestudy.domain.dto.TaskResponseDTO;
-import com.fatec.runestudy.domain.model.Skill;
 import com.fatec.runestudy.domain.model.Task;
 import com.fatec.runestudy.domain.model.User;
 
@@ -28,7 +27,7 @@ public interface TaskService {
 
     List<TaskResponseDTO> getBySkillId(Long id);
 
-    TaskResponseDTO createTask(TaskRequestDTO requestDTO, User user, Skill skill);
+    TaskResponseDTO createTask(TaskRequestDTO requestDTO, User user, Long skillId);
 
     TaskResponseDTO updateTaskById(Long id, TaskRequestDTO requestDTO);
 

@@ -11,9 +11,9 @@ import com.fatec.runestudy.domain.model.Task;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
     
-    boolean existsByName(String name);
+    boolean existsByTitle(String title);
 
-    Optional<Task> findByName(String name);
+    Optional<Task> findByTitle(String title);
 
     List<Task> findBySkillId(Long id);
 

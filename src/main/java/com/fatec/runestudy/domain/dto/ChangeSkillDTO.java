@@ -9,6 +9,6 @@ public class ChangeSkillDTO {
 
     @Valid
     @NotBlank
-    private String skillName;
+    private Long skillId;
 
 }
