@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.fatec.runestudy.domain.dto.BlockTaskDTO;
 import com.fatec.runestudy.domain.dto.ChangeSkillDTO;
 import com.fatec.runestudy.domain.dto.TaskRequestDTO;
 import com.fatec.runestudy.domain.dto.TaskResponseDTO;
@@ -32,6 +33,8 @@ public interface TaskService {
     TaskResponseDTO updateTaskById(Long id, TaskRequestDTO requestDTO);
 
     boolean changeSkillById(Long taskId, ChangeSkillDTO requestDTO);
+
+    boolean blockTaskById(Long taskId, BlockTaskDTO requestDTO);
 
     boolean deleteTaskById(Long id);
 

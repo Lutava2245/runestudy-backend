@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fatec.runestudy.domain.dto.BlockTaskDTO;
 import com.fatec.runestudy.domain.dto.ChangeSkillDTO;
 import com.fatec.runestudy.domain.dto.TaskRequestDTO;
 import com.fatec.runestudy.domain.dto.TaskResponseDTO;
@@ -111,7 +112,7 @@ public class TaskServiceImpl implements TaskService {
         if (taskRepository.existsByTitle(requestDTO.getTitle()) || !skillRepository.existsById(skillId)) {
             return null;
         }
-
+    
         Skill skill = skillRepository.findById(skillId).orElse(null);
         
         Task task = new Task();
@@ -161,6 +162,18 @@ public class TaskServiceImpl implements TaskService {
         Skill skill = skillRepository.findById(requestDTO.getSkillId()).orElse(null);
         task.setSkill(skill);
 
+        taskRepository.save(task);
+        return true;
+    }
+
+    @Override
+    public boolean blockTaskById(Long taskId, BlockTaskDTO requestDTO) {
+        if (!taskRepository.existsById(taskId)) {
+            return false;
+        }
+
+        Task task = taskRepository.findById(taskId).orElse(null);
+        task.setBlock(requestDTO.isBlock());
         taskRepository.save(task);
         return true;
     }
