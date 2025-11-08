@@ -6,12 +6,15 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.fatec.runestudy.domain.model.Skill;
 import com.fatec.runestudy.domain.model.Task;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
     
     boolean existsByTitle(String title);
+
+    boolean existsBySkill(Skill skill);
 
     Optional<Task> findByTitle(String title);
 

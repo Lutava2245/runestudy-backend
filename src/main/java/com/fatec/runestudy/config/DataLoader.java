@@ -12,9 +12,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.fatec.runestudy.domain.model.Role;
+import com.fatec.runestudy.domain.model.Skill;
+import com.fatec.runestudy.domain.model.Task;
 import com.fatec.runestudy.domain.model.User;
-import com.fatec.runestudy.domain.repository.RoleRepository;
-import com.fatec.runestudy.domain.repository.UserRepository;
+import com.fatec.runestudy.domain.repository.*;
 
 @Configuration
 public class DataLoader {
@@ -26,13 +27,21 @@ public class DataLoader {
     private UserRepository userRepository;
 
     @Autowired
+    private SkillRepository skillRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Bean
     CommandLineRunner initData() {
         return args -> {
-            createRoles();;
+            createRoles();
             createInitialAdmin();
+            createAdminSkill();
+            createAdminTask();
         };
     }
 
@@ -54,7 +63,7 @@ public class DataLoader {
     private void createInitialAdmin() {
         final String ADMIN_EMAIL = "admin@runestudy.com";
 
-        if (userRepository.findByEmail(ADMIN_EMAIL).isEmpty()) {
+        if (!userRepository.existsByEmail(ADMIN_EMAIL)) {
 
             // Senha inicial temporária
             String initialPassword = "GigaPowerMasterSuperMegaBlaster123456*";
@@ -76,6 +85,41 @@ public class DataLoader {
 
             userRepository.save(admin);
             System.out.println("Usuário Admin inicial criado com sucesso: " + ADMIN_EMAIL);
+        }
+    }
+
+    private void createAdminSkill() {
+        User adminUser = userRepository.findByEmail("admin@runestudy.com").orElse(null);
+
+        if (!skillRepository.existsByUser(adminUser)) {     
+            final String SKILL_NAME = "Habilidade Padrão";
+            
+            Skill skill = new Skill();
+            skill.setName(SKILL_NAME);
+            skill.setDifficult(1);
+            skill.setUser(adminUser);
+
+            skillRepository.save(skill);
+            System.out.println("Habilidade de Admin inicial criada com sucesso: " + SKILL_NAME);
+        }
+    }
+
+    private void createAdminTask() {
+        User adminUser = userRepository.findByEmail("admin@runestudy.com").orElse(null);
+        Skill skill = skillRepository.findByUserId(adminUser.getId()).getFirst();
+
+        if (!taskRepository.existsBySkill(skill)) {
+            final String TASK_TITLE = "Tarefa inicial";
+
+            Task task = new Task();
+            task.setTitle(TASK_TITLE);
+            task.setDescription("Descrição de template para tarefas criadas");
+            task.setTaskXP(100);
+            task.setUser(adminUser);
+            task.setSkill(skill);
+
+            taskRepository.save(task);
+            System.out.println("Tarefa de Admin inicial criada com sucesso: " + TASK_TITLE);
         }
     }
 
