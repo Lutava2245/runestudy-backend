@@ -15,8 +15,10 @@ import com.fatec.runestudy.domain.dto.UserCreateDTO;
 import com.fatec.runestudy.domain.dto.UserResponseDTO;
 import com.fatec.runestudy.domain.dto.UserUpdateDTO;
 import com.fatec.runestudy.domain.model.Role;
+import com.fatec.runestudy.domain.model.Skill;
 import com.fatec.runestudy.domain.model.User;
 import com.fatec.runestudy.domain.repository.RoleRepository;
+import com.fatec.runestudy.domain.repository.SkillRepository;
 import com.fatec.runestudy.domain.repository.UserRepository;
 import com.fatec.runestudy.service.UserService;
 
@@ -32,6 +34,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private SkillRepository skillRepository;
+
     @Override
     public UserResponseDTO convertToDTO(User user) {
         return new UserResponseDTO(
@@ -40,6 +45,15 @@ public class UserServiceImpl implements UserService {
             user.getEmail(),
             user.getTotalXP(),
             user.getTotalCoins());
+    }
+
+    @Override
+    public Skill createDefaultSkill(User user) {
+        Skill skill = new Skill();
+        skill.setName("Habilidade Padrão");
+        skill.setDifficult(1);
+        skill.setUser(user);
+        return skill;
     }
 
     @Override
@@ -84,6 +98,7 @@ public class UserServiceImpl implements UserService {
         user.setRoles(new HashSet<>(Collections.singletonList(userRole)));
 
         userRepository.save(user);
+        skillRepository.save(createDefaultSkill(user));
         return convertToDTO(user);
     }
 
@@ -122,7 +137,7 @@ public class UserServiceImpl implements UserService {
                 return false;
             }
     
-        } else if (!authenticatedUser.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+        } else if (authenticatedUser.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             return false;
         }
         

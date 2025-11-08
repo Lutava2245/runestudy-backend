@@ -8,12 +8,15 @@ import com.fatec.runestudy.domain.dto.ChangePasswordDTO;
 import com.fatec.runestudy.domain.dto.UserCreateDTO;
 import com.fatec.runestudy.domain.dto.UserResponseDTO;
 import com.fatec.runestudy.domain.dto.UserUpdateDTO;
+import com.fatec.runestudy.domain.model.Skill;
 import com.fatec.runestudy.domain.model.User;
 
 @Service
 public interface UserService {
 
     UserResponseDTO convertToDTO(User user);
+
+    Skill createDefaultSkill(User user);
 
     UserResponseDTO getById(Long id);
 
