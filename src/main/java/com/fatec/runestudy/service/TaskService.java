@@ -28,7 +28,7 @@ public interface TaskService {
 
     List<TaskResponseDTO> getBySkillId(Long id);
 
-    TaskResponseDTO createTask(TaskRequestDTO requestDTO, User user, Long skillId);
+    TaskResponseDTO createTask(TaskRequestDTO requestDTO, User user);
 
     TaskResponseDTO updateTaskById(Long id, TaskRequestDTO requestDTO);
 

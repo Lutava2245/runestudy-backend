@@ -22,4 +22,8 @@ public class TaskRequestDTO {
     @NotNull
     private int taskXP;
 
+    @Valid
+    @NotNull
+    private Long skillId;
+
 }

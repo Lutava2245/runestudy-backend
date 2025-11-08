@@ -108,12 +108,12 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskResponseDTO createTask(TaskRequestDTO requestDTO, User user, Long skillId) {
-        if (taskRepository.existsByTitle(requestDTO.getTitle()) || !skillRepository.existsById(skillId)) {
+    public TaskResponseDTO createTask(TaskRequestDTO requestDTO, User user) {
+        if (taskRepository.existsByTitle(requestDTO.getTitle()) || !skillRepository.existsById(requestDTO.getSkillId())) {
             return null;
         }
     
-        Skill skill = skillRepository.findById(skillId).orElse(null);
+        Skill skill = skillRepository.findById(requestDTO.getSkillId()).orElse(null);
         
         Task task = new Task();
         task.setTitle(requestDTO.getTitle());
