@@ -4,38 +4,34 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.fatec.runestudy.domain.dto.BlockTaskDTO;
-import com.fatec.runestudy.domain.dto.ChangeSkillDTO;
-import com.fatec.runestudy.domain.dto.TaskRequestDTO;
-import com.fatec.runestudy.domain.dto.TaskResponseDTO;
+import com.fatec.runestudy.domain.dto.request.TaskRequest;
+import com.fatec.runestudy.domain.dto.response.TaskResponse;
 import com.fatec.runestudy.domain.model.Task;
 import com.fatec.runestudy.domain.model.User;
 
 @Service
 public interface TaskService {
     
-    TaskResponseDTO convertToDTO(Task task);
+    TaskResponse convertToDTO(Task task);
 
     boolean isOwner(Long taskId, Long userId);
 
     boolean isFromSkill(Long taskId, Long skillId);
 
-    TaskResponseDTO getById(Long id);
+    TaskResponse getById(Long id);
 
-    List<TaskResponseDTO> getAll();
+    List<TaskResponse> getAll();
 
-    List<TaskResponseDTO> getByUserId(Long id);
+    List<TaskResponse> getByUserId(Long userId);
 
-    List<TaskResponseDTO> getBySkillId(Long id);
+    List<TaskResponse> getBySkillId(Long skillId);
 
-    TaskResponseDTO createTask(TaskRequestDTO requestDTO, User user);
+    TaskResponse createTask(TaskRequest request, User user);
 
-    TaskResponseDTO updateTaskById(Long id, TaskRequestDTO requestDTO);
+    TaskResponse updateTaskById(Long id, TaskRequest request);
 
-    boolean changeSkillById(Long taskId, ChangeSkillDTO requestDTO);
+    TaskResponse toggleTaskBlock(Long id);
 
-    boolean blockTaskById(Long taskId, BlockTaskDTO requestDTO);
-
-    boolean deleteTaskById(Long id);
+    void deleteTaskById(Long id);
 
 }

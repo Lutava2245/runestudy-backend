@@ -4,30 +4,30 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.fatec.runestudy.domain.dto.ChangePasswordDTO;
-import com.fatec.runestudy.domain.dto.UserCreateDTO;
-import com.fatec.runestudy.domain.dto.UserResponseDTO;
-import com.fatec.runestudy.domain.dto.UserUpdateDTO;
+import com.fatec.runestudy.domain.dto.request.ChangePasswordRequest;
+import com.fatec.runestudy.domain.dto.request.UserCreateRequest;
+import com.fatec.runestudy.domain.dto.request.UserUpdateRequest;
+import com.fatec.runestudy.domain.dto.response.UserResponse;
 import com.fatec.runestudy.domain.model.Skill;
 import com.fatec.runestudy.domain.model.User;
 
 @Service
 public interface UserService {
 
-    UserResponseDTO convertToDTO(User user);
+    UserResponse convertToDTO(User user);
 
     Skill createDefaultSkill(User user);
 
-    UserResponseDTO getById(Long id);
+    UserResponse getById(Long id);
 
-    List<UserResponseDTO> getAll();
+    List<UserResponse> getAll();
 
-    UserResponseDTO createUser(UserCreateDTO requestDTO);
+    UserResponse createUser(UserCreateRequest requestDTO);
 
-    UserResponseDTO updateUserById(Long id, UserUpdateDTO requestDTO);
+    UserResponse updateUserById(Long id, UserUpdateRequest requestDTO);
 
-    boolean changePasswordById(User authenticatedUser, Long id, ChangePasswordDTO requestDTO);
+    void changePassword(Long id, ChangePasswordRequest requestDTO);
 
-    boolean deleteUserById(Long id);
+    void deleteUserById(Long id);
 
 }

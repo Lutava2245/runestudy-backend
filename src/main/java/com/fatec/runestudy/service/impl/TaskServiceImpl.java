@@ -1,21 +1,20 @@
 package com.fatec.runestudy.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fatec.runestudy.domain.dto.BlockTaskDTO;
-import com.fatec.runestudy.domain.dto.ChangeSkillDTO;
-import com.fatec.runestudy.domain.dto.TaskRequestDTO;
-import com.fatec.runestudy.domain.dto.TaskResponseDTO;
+import com.fatec.runestudy.domain.dto.request.TaskRequest;
+import com.fatec.runestudy.domain.dto.response.TaskResponse;
 import com.fatec.runestudy.domain.model.Skill;
 import com.fatec.runestudy.domain.model.Task;
 import com.fatec.runestudy.domain.model.User;
 import com.fatec.runestudy.domain.repository.SkillRepository;
 import com.fatec.runestudy.domain.repository.TaskRepository;
+import com.fatec.runestudy.exception.BlockedTaskException;
+import com.fatec.runestudy.exception.ResourceNotFoundException;
 import com.fatec.runestudy.service.TaskService;
 
 @Service
@@ -28,52 +27,48 @@ public class TaskServiceImpl implements TaskService {
     private SkillRepository skillRepository;
 
     @Override
-    public TaskResponseDTO convertToDTO(Task task) {
-        return new TaskResponseDTO(
+    public TaskResponse convertToDTO(Task task) {
+        boolean block = task.getStatus() == "blocked";
+
+        return new TaskResponse(
+            task.getId(),
             task.getTitle(),
             task.getDescription(),
-            task.isBlock(),
             task.getStatus(),
+            block,
             task.getTaskXP());
     }
 
     @Override
     public boolean isOwner(Long taskId, Long userId) {
-        if (!taskRepository.existsById(taskId)) {
-            return false;
-        }
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
 
-        Task task = taskRepository.findById(taskId).orElse(null);
         return task.getUser().getId().equals(userId);
     }
 
     @Override
     public boolean isFromSkill(Long taskId, Long skillId) {
-        if (!taskRepository.existsById(taskId)) {
-            return false;
-        }
-
-        Task task = taskRepository.findById(taskId).orElse(null);
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
+        
         return task.getSkill().getId().equals(skillId);
     }
 
     @Override
-    public TaskResponseDTO getById(Long id) {
-        Task task = taskRepository.findById(id).orElse(null);
-
-        if (task == null) {
-            return null;
-        }
+    public TaskResponse getById(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
 
         return convertToDTO(task);
     }
 
     @Override
-    public List<TaskResponseDTO> getAll() {
+    public List<TaskResponse> getAll() {
         List<Task> tasks = taskRepository.findAll();
 
         if (tasks.isEmpty()) {
-            return new ArrayList<>();
+            throw new ResourceNotFoundException("Erro: Nenhuma tarefa encontrada.");
         }
 
         return tasks.stream()
@@ -82,11 +77,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponseDTO> getByUserId(Long id) {
+    public List<TaskResponse> getByUserId(Long id) {
         List<Task> tasks = taskRepository.findByUserId(id);
 
         if (tasks.isEmpty()) {
-            return new ArrayList<>();
+            throw new ResourceNotFoundException("Erro: Nenhuma tarefa encontrada.");
         }
 
         return tasks.stream()
@@ -95,11 +90,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponseDTO> getBySkillId(Long id) {
+    public List<TaskResponse> getBySkillId(Long id) {
         List<Task> tasks = taskRepository.findBySkillId(id);
 
         if (tasks.isEmpty()) {
-            return new ArrayList<>();
+            throw new ResourceNotFoundException("Erro: Nenhuma tarefa encontrada.");
         }
 
         return tasks.stream()
@@ -108,17 +103,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskResponseDTO createTask(TaskRequestDTO requestDTO, User user) {
-        if (taskRepository.existsByTitle(requestDTO.getTitle()) || !skillRepository.existsById(requestDTO.getSkillId())) {
-            return null;
-        }
-    
-        Skill skill = skillRepository.findById(requestDTO.getSkillId()).orElse(null);
+    public TaskResponse createTask(TaskRequest request, User user) {
+        Skill skill = skillRepository.findByNameAndUser(request.getSkillName(), user)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Habilidade não encontrada."));        
         
         Task task = new Task();
-        task.setTitle(requestDTO.getTitle());
-        task.setDescription(requestDTO.getDescription());
-        task.setTaskXP(requestDTO.getTaskXP());
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setTaskXP(request.getTaskXP());
         task.setUser(user);
         task.setSkill(skill);
 
@@ -127,66 +119,44 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskResponseDTO updateTaskById(Long id, TaskRequestDTO requestDTO) {
-        if (!taskRepository.existsByTitle(requestDTO.getTitle())) {
-            return null;
+    public TaskResponse updateTaskById(Long id, TaskRequest request) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
+        
+        if (task.getStatus().equals("blocked")) {
+            throw new BlockedTaskException();
         }
 
-        Task task = taskRepository.findById(id).orElse(null);
-        if (task.isBlock()) {
-            return null;
-        }
-
-        task.setTitle(requestDTO.getTitle());
-        task.setDescription(requestDTO.getDescription());
-        task.setTaskXP(requestDTO.getTaskXP());
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setTaskXP(request.getTaskXP());
 
         taskRepository.save(task);
         return convertToDTO(task);
     }
 
     @Override
-    public boolean changeSkillById(Long taskId, ChangeSkillDTO requestDTO) {
-        if (!taskRepository.existsById(taskId)) {
-            return false;
-        }
-        if (!skillRepository.existsById(requestDTO.getSkillId())) {
-            return false;
-        }
-
-        Task task = taskRepository.findById(taskId).orElse(null);
-        if (task.isBlock()) {
-            return false;
-        }
-
-        Skill skill = skillRepository.findById(requestDTO.getSkillId()).orElse(null);
-        task.setSkill(skill);
+    public TaskResponse toggleTaskBlock(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
+        
+        boolean block = task.getStatus().equals("blocked");
+        task.setStatus(block ? "pending" : "blocked");
 
         taskRepository.save(task);
-        return true;
+        return convertToDTO(task);
     }
 
     @Override
-    public boolean blockTaskById(Long taskId, BlockTaskDTO requestDTO) {
-        if (!taskRepository.existsById(taskId)) {
-            return false;
+    public void deleteTaskById(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
+        
+        if (task.getStatus().equals("blocked")) {
+            throw new BlockedTaskException();
         }
 
-        Task task = taskRepository.findById(taskId).orElse(null);
-        task.setBlock(requestDTO.isBlock());
-        taskRepository.save(task);
-        return true;
-    }
-
-    @Override
-    public boolean deleteTaskById(Long id) {
-        if (!taskRepository.existsById(id)) {
-            return false;
-        }
-
-        Task task = taskRepository.findById(id).orElse(null);
         taskRepository.delete(task);
-        return true;
     }
     
 }

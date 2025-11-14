@@ -1,6 +1,5 @@
 package com.fatec.runestudy.service.impl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -10,16 +9,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.fatec.runestudy.domain.dto.ChangePasswordDTO;
-import com.fatec.runestudy.domain.dto.UserCreateDTO;
-import com.fatec.runestudy.domain.dto.UserResponseDTO;
-import com.fatec.runestudy.domain.dto.UserUpdateDTO;
+import com.fatec.runestudy.domain.dto.request.ChangePasswordRequest;
+import com.fatec.runestudy.domain.dto.request.UserCreateRequest;
+import com.fatec.runestudy.domain.dto.request.UserUpdateRequest;
+import com.fatec.runestudy.domain.dto.response.UserResponse;
+import com.fatec.runestudy.domain.model.Avatar;
 import com.fatec.runestudy.domain.model.Role;
 import com.fatec.runestudy.domain.model.Skill;
 import com.fatec.runestudy.domain.model.User;
+import com.fatec.runestudy.domain.repository.AvatarRepository;
 import com.fatec.runestudy.domain.repository.RoleRepository;
 import com.fatec.runestudy.domain.repository.SkillRepository;
 import com.fatec.runestudy.domain.repository.UserRepository;
+import com.fatec.runestudy.exception.DuplicateResourceException;
+import com.fatec.runestudy.exception.ResourceNotFoundException;
+import com.fatec.runestudy.exception.SamePasswordException;
 import com.fatec.runestudy.service.UserService;
 
 @Service
@@ -35,14 +39,21 @@ public class UserServiceImpl implements UserService {
     private RoleRepository roleRepository;
 
     @Autowired
+    private AvatarRepository avatarRepository;
+
+    @Autowired
     private SkillRepository skillRepository;
 
     @Override
-    public UserResponseDTO convertToDTO(User user) {
-        return new UserResponseDTO(
+    public UserResponse convertToDTO(User user) {
+        return new UserResponse(
+            user.getId(),
             user.getName(),
             user.getNickname(),
             user.getEmail(),
+            user.getCurrentAvatar().getIcon(),
+            user.getLevel(),
+            user.getCreatedAt(),
             user.getTotalXP(),
             user.getTotalCoins());
     }
@@ -50,29 +61,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public Skill createDefaultSkill(User user) {
         Skill skill = new Skill();
-        skill.setName("Habilidade Padrão");
-        skill.setDifficult(1);
+        skill.setName("Habilidade Inicial");
+        skill.setIcon("📝");
         skill.setUser(user);
         return skill;
     }
 
     @Override
-    public UserResponseDTO getById(Long id) {
-        User user = userRepository.findById(id).orElse(null);
-
-        if (user == null) {
-            return null;
-        }
+    public UserResponse getById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Usuário não encontrado."));
 
         return convertToDTO(user);
     }
 
     @Override
-    public List<UserResponseDTO> getAll() {
+    public List<UserResponse> getAll() {
         List<User> users = userRepository.findAll();
 
         if (users.isEmpty()) {
-            return new ArrayList<>();
+            throw new ResourceNotFoundException("Erro: Nenhum usuário encontrado.");
         }
 
         return users.stream()
@@ -81,21 +89,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO createUser(UserCreateDTO requestDTO) {
-        if (userRepository.existsByEmailOrNickname(requestDTO.getEmail(), requestDTO.getNickname())) {
-            return null;
+    public UserResponse createUser(UserCreateRequest request) {
+        if (userRepository.existsByEmailOrNickname(request.getEmail(), request.getNickname())) {
+            throw new DuplicateResourceException("Erro: Email/Nickname já existentes.");
         }
 
-        String hashedPassword = passwordEncoder.encode(requestDTO.getPassword());
+        String hashedPassword = passwordEncoder.encode(request.getPassword());
         Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Erro: Role padrão não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Role padrão não encontrado."));
+        Avatar initialAvatar = avatarRepository.findByName("Pessoa")
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Avatar inicial não encontrado."));
 
         User user = new User();
-        user.setName(requestDTO.getName());
-        user.setNickname(requestDTO.getNickname());
-        user.setEmail(requestDTO.getEmail());
+        user.setName(request.getName());
+        user.setNickname(request.getNickname());
+        user.setEmail(request.getEmail());
+        user.setCurrentAvatar(initialAvatar);
         user.setPassword(hashedPassword);
         user.setRoles(new HashSet<>(Collections.singletonList(userRole)));
+        user.setOwnedAvatars(new HashSet<>());
 
         userRepository.save(user);
         skillRepository.save(createDefaultSkill(user));
@@ -103,60 +115,43 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO updateUserById(Long id, UserUpdateDTO requestDTO) {
-        if (!userRepository.existsById(id)) {
-            return null;
-        }
+    public UserResponse updateUserById(Long id, UserUpdateRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Usuário não encontrado."));
 
-        User user = userRepository.findById(id).orElse(null);
-
-        if (userRepository.existsByEmailOrNickname(requestDTO.getEmail(), requestDTO.getNickname())) {
-            return null;
+        if (userRepository.existsByEmailOrNickname(request.getEmail(), request.getNickname())) {
+            throw new DuplicateResourceException("Erro: Email/Nickname já existentes.");
         }
         
-        user.setName(requestDTO.getName());
-        user.setNickname(requestDTO.getNickname());
-        user.setEmail(requestDTO.getEmail());
+        user.setName(request.getName());
+        user.setNickname(request.getNickname());
+        user.setEmail(request.getEmail());
 
         userRepository.save(user);
         return convertToDTO(user);
     }
 
     @Override
-    public boolean changePasswordById(User authenticatedUser, Long id, ChangePasswordDTO requestDTO) {
-        if (!userRepository.existsById(id)) {
-            return false;
-        }
-
-        User user = userRepository.findById(id).orElse(null);
-        if (user.getUsername().equals(authenticatedUser.getUsername())) {
-            if (!passwordEncoder.matches(requestDTO.getCurrentPassword(), user.getPassword())) {
-                return false;
-            }
-            if (requestDTO.getCurrentPassword().equals(requestDTO.getNewPassword())) {
-                return false;
-            }
-    
-        } else if (authenticatedUser.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            return false;
+    public void changePassword(Long id, ChangePasswordRequest requestDTO) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Usuário não encontrado."));
+        
+        if (passwordEncoder.matches(requestDTO.getNewPassword(), user.getPassword())) {
+            throw new SamePasswordException();
         }
         
         String newPassword = requestDTO.getNewPassword();
         user.setPassword(passwordEncoder.encode(newPassword));
 
         userRepository.save(user);
-        return true;
     }
 
     @Override
-    public boolean deleteUserById(Long id) {
-        if (!userRepository.existsById(id)) {
-            return false;
-        }
+    public void deleteUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Usuário não encontrado."));
 
-        User user = userRepository.findById(id).orElse(null);
         userRepository.delete(user);
-        return true;
     }
     
 }

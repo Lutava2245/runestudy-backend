@@ -1,17 +1,20 @@
 package com.fatec.runestudy.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fatec.runestudy.domain.dto.SkillRequestDTO;
-import com.fatec.runestudy.domain.dto.SkillResponseDTO;
+import com.fatec.runestudy.domain.dto.request.SkillRequest;
+import com.fatec.runestudy.domain.dto.response.SkillResponse;
 import com.fatec.runestudy.domain.model.Skill;
+import com.fatec.runestudy.domain.model.Task;
 import com.fatec.runestudy.domain.model.User;
 import com.fatec.runestudy.domain.repository.SkillRepository;
+import com.fatec.runestudy.domain.repository.TaskRepository;
+import com.fatec.runestudy.exception.DuplicateResourceException;
+import com.fatec.runestudy.exception.ResourceNotFoundException;
 import com.fatec.runestudy.service.SkillService;
 
 @Service
@@ -20,42 +23,47 @@ public class SkillServiceImpl implements SkillService {
     @Autowired
     private SkillRepository skillRepository;
 
+    @Autowired
+    private TaskRepository taskRepository;
+
     @Override
-    public SkillResponseDTO convertToDTO(Skill skill) {
-        return new SkillResponseDTO(
+    public SkillResponse convertToDTO(Skill skill) {
+        List<Task> tasks = taskRepository.findBySkillId(skill.getId());
+
+        int totalXP = tasks.isEmpty() ? 0 : tasks.stream()
+            .mapToInt(Task::getTaskXP)
+            .sum();
+
+        return new SkillResponse(
+            skill.getId(),
             skill.getName(),
-            skill.getPoints(),
-            skill.getDifficult(),
-            skill.getTotalXP());
+            skill.getIcon(),
+            totalXP,
+            tasks.size());
     }
 
     @Override
     public boolean isOwner(Long skillId, Long userId) {
-        if (!skillRepository.existsById(skillId)) {
-            return false;
-        }
-
-        Skill skill = skillRepository.findById(skillId).orElse(null);
+        Skill skill = skillRepository.findById(skillId)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Habilidade não encontrada."));
+        
         return skill.getUser().getId().equals(userId);
     }
 
     @Override
-    public SkillResponseDTO getById(Long id) {
-        Skill skill = skillRepository.findById(id).orElse(null);
-
-        if (skill == null) {
-            return null;
-        }
+    public SkillResponse getById(Long id) {
+        Skill skill = skillRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Habilidade não encontrada."));
 
         return convertToDTO(skill);
     }
 
     @Override
-    public List<SkillResponseDTO> getAll() {
+    public List<SkillResponse> getAll() {
         List<Skill> skills = skillRepository.findAll();
 
         if (skills.isEmpty()) {
-            return new ArrayList<>();
+            throw new ResourceNotFoundException("Erro: Nenhuma habilidade encontrada.");
         }
 
         return skills.stream()
@@ -64,11 +72,11 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public List<SkillResponseDTO> getByUserId(Long id) {
+    public List<SkillResponse> getByUserId(Long id) {
         List<Skill> skills = skillRepository.findByUserId(id);
 
         if (skills.isEmpty()) {
-            return new ArrayList<>();
+            throw new ResourceNotFoundException("Erro: Nenhuma habilidade encontrada.");
         }
 
         return skills.stream()
@@ -77,14 +85,14 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public SkillResponseDTO createSkill(SkillRequestDTO requestDTO, User user) {
-        if (skillRepository.existsByName(requestDTO.getName())) {
-            return null;
+    public SkillResponse createSkill(SkillRequest request, User user) {
+        if (skillRepository.existsByNameAndUser(request.getName(), user)) {
+            throw new DuplicateResourceException("Erro: Habilidade de mesmo nome já existente.");
         }
 
         Skill skill = new Skill();
-        skill.setName(requestDTO.getName());
-        skill.setDifficult(requestDTO.getDifficult());
+        skill.setName(request.getName());
+        skill.setIcon(request.getIcon());
         skill.setUser(user);
 
         skillRepository.save(skill);
@@ -92,28 +100,27 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public SkillResponseDTO updateSkillById(Long id, SkillRequestDTO requestDTO) {
-        if (!skillRepository.existsByName(requestDTO.getName())) {
-            return null;
+    public SkillResponse updateSkillById(Long id, SkillRequest request) {
+        Skill skill = skillRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Habilidade não encontrada."));
+
+        if (skillRepository.existsByNameAndUser(request.getName(), skill.getUser())) {
+            throw new DuplicateResourceException("Erro: Habilidade de mesmo nome já existente.");
         }
 
-        Skill skill = skillRepository.findById(id).orElse(null);
-        skill.setName(requestDTO.getName());
-        skill.setDifficult(requestDTO.getDifficult());
+        skill.setName(request.getName());
+        skill.setIcon(request.getIcon());
 
         skillRepository.save(skill);
         return convertToDTO(skill);
     }
 
     @Override
-    public boolean deleteSkillById(Long id) {
-        if (!skillRepository.existsById(id)) {
-            return false;
-        }
+    public void deleteSkillById(Long id) {
+        Skill skill = skillRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Habilidade não encontrada."));
 
-        Skill skill = skillRepository.findById(id).orElse(null);
         skillRepository.delete(skill);
-        return true;
     }
     
 }
