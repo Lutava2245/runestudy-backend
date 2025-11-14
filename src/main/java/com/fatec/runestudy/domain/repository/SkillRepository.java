@@ -12,11 +12,11 @@ import com.fatec.runestudy.domain.model.User;
 @Repository
 public interface SkillRepository extends JpaRepository<Skill, Long> {
     
-    boolean existsByName(String name);
+    boolean existsByNameAndUser(String name, User user);
 
     boolean existsByUser(User user);
 
-    Optional<Skill> findByName(String name);
+    Optional<Skill> findByNameAndUser(String name, User user);
 
     List<Skill> findByUserId(Long id);
 

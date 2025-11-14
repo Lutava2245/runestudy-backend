@@ -8,11 +8,12 @@ import org.springframework.stereotype.Repository;
 
 import com.fatec.runestudy.domain.model.Skill;
 import com.fatec.runestudy.domain.model.Task;
+import com.fatec.runestudy.domain.model.User;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
     
-    boolean existsByTitle(String title);
+    boolean existsByTitleAndUser(String title, User user);
 
     boolean existsBySkill(Skill skill);
 
