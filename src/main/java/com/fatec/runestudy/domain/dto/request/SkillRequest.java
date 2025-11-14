@@ -1,13 +1,12 @@
-package com.fatec.runestudy.domain.dto;
+package com.fatec.runestudy.domain.dto.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class SkillRequestDTO {
+public class SkillRequest {
 
     @Valid
     @NotBlank
@@ -15,7 +14,7 @@ public class SkillRequestDTO {
     private String name;
 
     @Valid
-    @NotNull
-    private int difficult;
+    @NotBlank
+    private String icon;
     
 }

@@ -1,4 +1,4 @@
-package com.fatec.runestudy.domain.dto;
+package com.fatec.runestudy.domain.dto.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class TaskRequestDTO {
+public class TaskRequest {
     
     @Valid
     @NotBlank
@@ -24,6 +24,6 @@ public class TaskRequestDTO {
 
     @Valid
     @NotNull
-    private Long skillId;
+    private String skillName;
 
 }

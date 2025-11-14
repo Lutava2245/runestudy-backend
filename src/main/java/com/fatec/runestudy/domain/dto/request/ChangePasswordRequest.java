@@ -1,14 +1,14 @@
-package com.fatec.runestudy.domain.dto;
+package com.fatec.runestudy.domain.dto.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class ChangeSkillDTO {
+public class ChangePasswordRequest {
 
     @Valid
     @NotBlank
-    private Long skillId;
+    private String newPassword;
 
 }

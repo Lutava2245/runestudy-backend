@@ -1,19 +1,21 @@
-package com.fatec.runestudy.domain.dto;
+package com.fatec.runestudy.domain.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class TaskResponseDTO {
+public class TaskResponse {
+
+    private Long id;
     
     private String title;
 
     private String description;
 
-    private boolean block;
-
     private String status;
+
+    private boolean block;
 
     private int task_xp;
 
