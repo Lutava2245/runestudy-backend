@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fatec.runestudy.domain.dto.SkillRequestDTO;
-import com.fatec.runestudy.domain.dto.SkillResponseDTO;
+import com.fatec.runestudy.domain.dto.request.SkillRequest;
+import com.fatec.runestudy.domain.dto.response.SkillResponse;
 import com.fatec.runestudy.domain.model.User;
 import com.fatec.runestudy.service.SkillService;
 
@@ -29,55 +29,46 @@ public class SkillController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<SkillResponseDTO>> getAllSkills() {
-        List<SkillResponseDTO> skills = skillService.getAll();
-        return skills.isEmpty()
-            ? ResponseEntity.notFound().build()
-            : ResponseEntity.ok(skills);
+    public ResponseEntity<List<SkillResponse>> getAllSkills() {
+        List<SkillResponse> skillResponses = skillService.getAll();
+        return ResponseEntity.ok(skillResponses);
     }
 
     @GetMapping("user/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
-    public ResponseEntity<List<SkillResponseDTO>> getAllSkillsByUser(@PathVariable Long id) {
-        List<SkillResponseDTO> skills = skillService.getByUserId(id);
-        return skills.isEmpty()
-            ? ResponseEntity.notFound().build()
-            : ResponseEntity.ok(skills);
+    public ResponseEntity<List<SkillResponse>> getAllSkillsByUser(@PathVariable Long id) {
+        List<SkillResponse> skillResponses = skillService.getByUserId(id);
+        return ResponseEntity.ok(skillResponses);
     }
 
     @GetMapping("{id}")
     @PreAuthorize("hasRole('ADMIN') or @skillService.isOwner(#id, principal.id)")
-    public ResponseEntity<SkillResponseDTO> getSkill(@PathVariable Long id) {
-        SkillResponseDTO skill = skillService.getById(id);
-        return skill != null
-            ? ResponseEntity.ok(skill)
+    public ResponseEntity<SkillResponse> getSkill(@PathVariable Long id) {
+        SkillResponse skillResponse = skillService.getById(id);
+        return skillResponse != null
+            ? ResponseEntity.ok(skillResponse)
             : ResponseEntity.notFound().build();
     }
     
     @PostMapping("register")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<SkillResponseDTO> registerSkill(@RequestBody SkillRequestDTO requestDTO, @AuthenticationPrincipal User user) {
-        SkillResponseDTO skill = skillService.createSkill(requestDTO, user);
-        return skill != null
-            ? ResponseEntity.ok(skill)
-            : ResponseEntity.badRequest().build();
+    public ResponseEntity<SkillResponse> registerSkill(@RequestBody SkillRequest requestDTO, @AuthenticationPrincipal User user) {
+        SkillResponse skillResponse = skillService.createSkill(requestDTO, user);
+        return ResponseEntity.ok(skillResponse);
     }
 
     @PutMapping("{id}")
     @PreAuthorize("hasRole('ADMIN') or @skillService.isOwner(#id, principal.id)")
-    public ResponseEntity<SkillResponseDTO> editSkill(@RequestBody SkillRequestDTO requestDTO, @PathVariable Long id) {
-        SkillResponseDTO skill = skillService.updateSkillById(id, requestDTO);
-        return skill != null
-            ? ResponseEntity.ok(skill)
-            : ResponseEntity.badRequest().build();
+    public ResponseEntity<SkillResponse> editSkill(@RequestBody SkillRequest requestDTO, @PathVariable Long id) {
+        SkillResponse skillResponse = skillService.updateSkillById(id, requestDTO);
+        return ResponseEntity.ok(skillResponse);
     }
     
     @DeleteMapping("{id}")
     @PreAuthorize("hasRole('ADMIN') or @skillService.isOwner(#id, principal.id)")
     public ResponseEntity<Void> deleteSkill(@PathVariable Long id) {
-        return skillService.deleteSkillById(id)
-            ? ResponseEntity.noContent().build()
-            : ResponseEntity.notFound().build();
+        skillService.deleteSkillById(id);
+        return  ResponseEntity.noContent().build();
     }
 
 }
