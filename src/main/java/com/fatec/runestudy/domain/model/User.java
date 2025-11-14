@@ -1,5 +1,6 @@
 package com.fatec.runestudy.domain.model;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,11 +47,29 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 254, unique = true)
     private String email;
 
+    @ManyToOne
+    @JoinColumn(name = "avatar_id", nullable = false)
+    private Avatar currentAvatar;
+
     @Column
     private int totalXP = 0;
 
     @Column
     private int totalCoins = 0;
+
+    @Column
+    private int level = 1;
+
+    @Column
+    private LocalDate createdAt = LocalDate.now();
+
+    @ManyToMany
+    @JoinTable(
+        name = "user_avatar",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "avatar_id")
+    )
+    private Set<Avatar> ownedAvatars;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

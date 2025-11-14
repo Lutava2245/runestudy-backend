@@ -23,20 +23,14 @@ public class Skill {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 50)
     private String name;
 
-    @Column
-    private int points = 1;
-
-    @Column
-    private int difficult = 1;
-
-    @Column
-    private int totalXP = 0;
+    @Column(nullable = false)
+    private String icon;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    
+
 }

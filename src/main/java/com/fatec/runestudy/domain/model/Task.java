@@ -1,5 +1,7 @@
 package com.fatec.runestudy.domain.model;
 
+import org.hibernate.annotations.Check;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,6 +19,8 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "tasks")
+@Check(constraints = "status IN ('pending', 'blocked', 'completed')")
+@Check(constraints = "taskXP IN (20, 30, 50)")
 public class Task {
 
     @Id
@@ -30,10 +34,7 @@ public class Task {
     private String description;
 
     @Column
-    private boolean block = false;
-
-    @Column
-    private String status = "tarefa_ativa";
+    private String status = "pending";
 
     @Column
     private int taskXP;
