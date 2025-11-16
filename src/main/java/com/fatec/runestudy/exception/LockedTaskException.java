@@ -2,10 +2,10 @@ package com.fatec.runestudy.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class BlockedTaskException extends ApiException {
+public class LockedTaskException extends ApiException {
 
-    public BlockedTaskException() {
-        super("Erro: Tarefa está bloqueada.");
+    public LockedTaskException(String message) {
+        super(message);
     }
 
     @Override
