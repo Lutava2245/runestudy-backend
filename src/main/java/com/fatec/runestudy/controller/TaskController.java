@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @RequestMapping("api/tasks")
 public class TaskController {
     
@@ -78,6 +80,13 @@ public class TaskController {
     @PreAuthorize("hasRole('ADMIN') or @taskService.isOwner(#id, principal.id)")
     public ResponseEntity<TaskResponse> blockTask(@PathVariable Long id) {
         TaskResponse taskResponse = taskService.toggleTaskBlock(id);
+        return ResponseEntity.ok(taskResponse);
+    }
+
+    @PatchMapping("{id}/complete")
+    @PreAuthorize("hasRole('ADMIN') or @taskService.isOwner(#id, principal.id)")
+    public ResponseEntity<TaskResponse> completeTask(@PathVariable Long id) {
+        TaskResponse taskResponse = taskService.markTaskAsComplete(id);
         return ResponseEntity.ok(taskResponse);
     }
 
