@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fatec.runestudy.domain.dto.request.TaskRequest;
 import com.fatec.runestudy.domain.dto.response.TaskResponse;
@@ -13,13 +14,17 @@ import com.fatec.runestudy.domain.model.Task;
 import com.fatec.runestudy.domain.model.User;
 import com.fatec.runestudy.domain.repository.SkillRepository;
 import com.fatec.runestudy.domain.repository.TaskRepository;
-import com.fatec.runestudy.exception.BlockedTaskException;
+import com.fatec.runestudy.domain.repository.UserRepository;
+import com.fatec.runestudy.exception.LockedTaskException;
 import com.fatec.runestudy.exception.ResourceNotFoundException;
 import com.fatec.runestudy.service.TaskService;
 
 @Service
 public class TaskServiceImpl implements TaskService {
 
+    @Autowired
+    private UserRepository userRepository;
+    
     @Autowired
     private TaskRepository taskRepository;
 
@@ -102,6 +107,7 @@ public class TaskServiceImpl implements TaskService {
             .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public TaskResponse createTask(TaskRequest request, User user) {
         Skill skill = skillRepository.findByNameAndUser(request.getSkillName(), user)
@@ -118,13 +124,16 @@ public class TaskServiceImpl implements TaskService {
         return convertToDTO(task);
     }
 
+    @Transactional
     @Override
     public TaskResponse updateTaskById(Long id, TaskRequest request) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
         
-        if (task.getStatus().equals("blocked")) {
-            throw new BlockedTaskException();
+        switch (task.getStatus()) {
+            case "blocked" -> throw new LockedTaskException("Erro: Tarefa está bloqueada.");
+            case "completed" -> throw new LockedTaskException("Erro: Tarefa já foi completada.");
+            default -> {}
         }
 
         task.setTitle(request.getTitle());
@@ -135,10 +144,15 @@ public class TaskServiceImpl implements TaskService {
         return convertToDTO(task);
     }
 
+    @Transactional
     @Override
     public TaskResponse toggleTaskBlock(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
+        
+        if (task.getStatus().equals("completed")) {
+            throw new LockedTaskException("Erro: Tarefa já foi completada.");
+        }
         
         boolean block = task.getStatus().equals("blocked");
         task.setStatus(block ? "pending" : "blocked");
@@ -147,16 +161,44 @@ public class TaskServiceImpl implements TaskService {
         return convertToDTO(task);
     }
 
+    @Transactional
+    @Override
+    public TaskResponse markTaskAsComplete(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
+        User user = task.getUser();
+
+        switch (task.getStatus()) {
+            case "blocked" -> throw new LockedTaskException("Erro: Tarefa está bloqueada.");
+            case "completed" -> throw new LockedTaskException("Erro: Tarefa já foi completada.");
+            default -> {}
+        }
+
+        int taskXP = task.getTaskXP();
+        int taskCoins = taskXP;
+        
+        task.setStatus("completed");
+        user.setTotalXP(user.getTotalXP() + taskXP);
+        user.setTotalCoins(user.getTotalCoins() + taskCoins);
+
+        userRepository.save(user);
+        taskRepository.save(task);
+        return convertToDTO(task);
+    }
+    
+    @Transactional
     @Override
     public void deleteTaskById(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
         
-        if (task.getStatus().equals("blocked")) {
-            throw new BlockedTaskException();
+        switch (task.getStatus()) {
+            case "blocked" -> throw new LockedTaskException("Erro: Tarefa está bloqueada.");
+            case "completed" -> throw new LockedTaskException("Erro: Tarefa já foi completada.");
+            default -> {}
         }
 
         taskRepository.delete(task);
     }
-    
+
 }

@@ -32,6 +32,8 @@ public interface TaskService {
 
     TaskResponse toggleTaskBlock(Long id);
 
+    TaskResponse markTaskAsComplete(Long id);
+
     void deleteTaskById(Long id);
 
 }
