@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fatec.runestudy.domain.dto.request.SkillRequest;
 import com.fatec.runestudy.domain.dto.response.SkillResponse;
@@ -99,6 +100,7 @@ public class SkillServiceImpl implements SkillService {
         return convertToDTO(skill);
     }
 
+    @Transactional
     @Override
     public SkillResponse updateSkillById(Long id, SkillRequest request) {
         Skill skill = skillRepository.findById(id)
@@ -115,6 +117,7 @@ public class SkillServiceImpl implements SkillService {
         return convertToDTO(skill);
     }
 
+    @Transactional
     @Override
     public void deleteSkillById(Long id) {
         Skill skill = skillRepository.findById(id)

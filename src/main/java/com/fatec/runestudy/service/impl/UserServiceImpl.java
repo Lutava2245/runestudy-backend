@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fatec.runestudy.domain.dto.request.ChangePasswordRequest;
 import com.fatec.runestudy.domain.dto.request.UserCreateRequest;
@@ -88,6 +89,7 @@ public class UserServiceImpl implements UserService {
             .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public UserResponse createUser(UserCreateRequest request) {
         if (userRepository.existsByEmailOrNickname(request.getEmail(), request.getNickname())) {
@@ -114,6 +116,7 @@ public class UserServiceImpl implements UserService {
         return convertToDTO(user);
     }
 
+    @Transactional
     @Override
     public UserResponse updateUserById(Long id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
@@ -131,6 +134,7 @@ public class UserServiceImpl implements UserService {
         return convertToDTO(user);
     }
 
+    @Transactional
     @Override
     public void changePassword(Long id, ChangePasswordRequest requestDTO) {
         User user = userRepository.findById(id)
@@ -146,6 +150,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     @Override
     public void deleteUserById(Long id) {
         User user = userRepository.findById(id)
