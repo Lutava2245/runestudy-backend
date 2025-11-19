@@ -3,6 +3,7 @@ package com.fatec.runestudy.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +23,7 @@ import com.fatec.runestudy.domain.dto.request.UserCreateRequest;
 import com.fatec.runestudy.domain.dto.request.UserUpdateRequest;
 import com.fatec.runestudy.domain.dto.response.UserResponse;
 import com.fatec.runestudy.domain.model.User;
+import com.fatec.runestudy.service.AvatarService;
 import com.fatec.runestudy.service.UserService;
 
 @RestController
@@ -31,6 +33,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AvatarService avatarService;
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -54,22 +59,29 @@ public class UserController {
     }
     
     @PostMapping("register")
-    public ResponseEntity<UserResponse> registerUser(@RequestBody UserCreateRequest request) {
-        UserResponse userResponse = userService.createUser(request);
-        return ResponseEntity.ok(userResponse);
+    public ResponseEntity<Void> registerUser(@RequestBody UserCreateRequest request) {
+        userService.createUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
     
     @PutMapping("{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
-    public ResponseEntity<UserResponse> editUser(@PathVariable Long id, @RequestBody UserUpdateRequest request) {
-        UserResponse userResponse = userService.updateUserById(id, request);
-        return ResponseEntity.ok(userResponse);
+    public ResponseEntity<Void> editUser(@PathVariable Long id, @RequestBody UserUpdateRequest request) {
+        userService.updateUserById(id, request);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("{id}/password")
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     public ResponseEntity<Void> changePassword(@PathVariable Long id, @RequestBody ChangePasswordRequest request) {
         userService.changePassword(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("avatar/{avatarName}")
+    @PreAuthorize("@avatarService.isOwned(#avatarName, principal.id)")
+    public ResponseEntity<Void> selectAvatar(@AuthenticationPrincipal User user, @PathVariable String avatarName) {
+        userService.selectAvatar(user, avatarName);
         return ResponseEntity.noContent().build();
     }
 
