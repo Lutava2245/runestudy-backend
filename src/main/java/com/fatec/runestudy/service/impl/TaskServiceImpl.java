@@ -34,6 +34,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskResponse convertToDTO(Task task) {
         boolean block = task.getStatus() == "blocked";
+        int coins = task.getTaskXP()/2;
 
         return new TaskResponse(
             task.getId(),
@@ -41,7 +42,8 @@ public class TaskServiceImpl implements TaskService {
             task.getDescription(),
             task.getStatus(),
             block,
-            task.getTaskXP());
+            task.getTaskXP(),
+            coins);
     }
 
     @Override
@@ -175,7 +177,7 @@ public class TaskServiceImpl implements TaskService {
         }
 
         int taskXP = task.getTaskXP();
-        int taskCoins = taskXP;
+        int taskCoins = taskXP/2;
         
         task.setStatus("completed");
         user.setTotalXP(user.getTotalXP() + taskXP);

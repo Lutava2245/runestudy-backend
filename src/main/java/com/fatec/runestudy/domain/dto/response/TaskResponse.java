@@ -17,6 +17,8 @@ public class TaskResponse {
 
     private boolean block;
 
-    private int task_xp;
+    private int taskXP;
+
+    private int taskCoins;
 
 }
