@@ -61,9 +61,12 @@ public class User implements UserDetails {
     private int level = 1;
 
     @Column
+    private int xpToNextLevel = 150;
+
+    @Column
     private LocalDate createdAt = LocalDate.now();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_avatar",
         joinColumns = @JoinColumn(name = "user_id"),

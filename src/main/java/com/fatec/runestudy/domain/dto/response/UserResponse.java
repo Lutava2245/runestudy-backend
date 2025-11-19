@@ -21,10 +21,14 @@ public class UserResponse {
 
     private int level;
 
-    private LocalDate createdAt;
+    private int xpToNextLevel;
+
+    private double levelPercentage;
 
     private int totalXP;
-
+    
     private int totalCoins;
+
+    private LocalDate createdAt;
     
 }
