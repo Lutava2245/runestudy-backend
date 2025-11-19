@@ -47,6 +47,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse convertToDTO(User user) {
+        double levelPercentage = (user.getTotalXP() * 100) / user.getXpToNextLevel();
+
         return new UserResponse(
             user.getId(),
             user.getName(),
@@ -54,9 +56,11 @@ public class UserServiceImpl implements UserService {
             user.getEmail(),
             user.getCurrentAvatar().getIcon(),
             user.getLevel(),
-            user.getCreatedAt(),
+            user.getXpToNextLevel(),
+            levelPercentage,
             user.getTotalXP(),
-            user.getTotalCoins());
+            user.getTotalCoins(),
+            user.getCreatedAt());
     }
 
     @Override
@@ -66,6 +70,19 @@ public class UserServiceImpl implements UserService {
         skill.setIcon("📝");
         skill.setUser(user);
         return skill;
+    }
+
+    @Override
+    public void upUserLevel(User user) {
+        if (user.getTotalXP() >= user.getXpToNextLevel()) {
+            int newLevel = user.getLevel() + 1;
+            int newXpToLevel = user.getXpToNextLevel() + (50 * user.getLevel());
+            
+            user.setLevel(newLevel);
+            user.setXpToNextLevel(newXpToLevel);
+
+            userRepository.save(user);
+        }
     }
 
     @Override
@@ -91,7 +108,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserResponse createUser(UserCreateRequest request) {
+    public void createUser(UserCreateRequest request) {
         if (userRepository.existsByEmailOrNickname(request.getEmail(), request.getNickname())) {
             throw new DuplicateResourceException("Erro: Email/Nickname já existentes.");
         }
@@ -113,12 +130,11 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
         skillRepository.save(createDefaultSkill(user));
-        return convertToDTO(user);
     }
 
     @Transactional
     @Override
-    public UserResponse updateUserById(Long id, UserUpdateRequest request) {
+    public void updateUserById(Long id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Usuário não encontrado."));
 
@@ -131,7 +147,6 @@ public class UserServiceImpl implements UserService {
         user.setEmail(request.getEmail());
 
         userRepository.save(user);
-        return convertToDTO(user);
     }
 
     @Transactional
@@ -147,6 +162,15 @@ public class UserServiceImpl implements UserService {
         String newPassword = requestDTO.getNewPassword();
         user.setPassword(passwordEncoder.encode(newPassword));
 
+        userRepository.save(user);
+    }
+
+    @Override
+    public void selectAvatar(User user, String avatarName) {
+        Avatar avatar = avatarRepository.findByName(avatarName)
+            .orElseThrow(() -> new ResourceNotFoundException("Erro: Nenhum avatar encontrado."));
+        
+        user.setCurrentAvatar(avatar);
         userRepository.save(user);
     }
 

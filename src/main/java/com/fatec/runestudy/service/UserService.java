@@ -18,15 +18,19 @@ public interface UserService {
 
     Skill createDefaultSkill(User user);
 
+    void upUserLevel(User user);
+
     UserResponse getById(Long id);
 
     List<UserResponse> getAll();
 
-    UserResponse createUser(UserCreateRequest requestDTO);
+    void createUser(UserCreateRequest requestDTO);
 
-    UserResponse updateUserById(Long id, UserUpdateRequest requestDTO);
+    void updateUserById(Long id, UserUpdateRequest requestDTO);
 
     void changePassword(Long id, ChangePasswordRequest requestDTO);
+
+    void selectAvatar(User user, String avatarName);
 
     void deleteUserById(Long id);
 
