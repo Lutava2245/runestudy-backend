@@ -22,10 +22,13 @@ public class Avatar {
     private Long id;
 
     @Column(nullable = false, length = 50)
-    private String name;
+    private String title;
 
     @Column(nullable = false)
     private String icon;
+
+    @Column(nullable = false)
+    private String iconName;
 
     @Column
     private int price;

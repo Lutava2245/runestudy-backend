@@ -9,7 +9,9 @@ public class AvatarResponse {
 
     private Long id;
 
-    private String name;
+    private String title;
+
+    private String iconName;
 
     private String icon;
 

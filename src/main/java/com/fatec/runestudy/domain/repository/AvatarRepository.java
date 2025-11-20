@@ -10,8 +10,10 @@ import com.fatec.runestudy.domain.model.Avatar;
 @Repository
 public interface AvatarRepository extends JpaRepository<Avatar, Long> {
 
-    boolean existsByName(String name);
+    boolean existsByIconName(String name);
 
-    Optional<Avatar> findByName(String name);
+    Optional<Avatar> findByTitle(String name);
+    
+    Optional<Avatar> findByIconName(String name);
 
 }
