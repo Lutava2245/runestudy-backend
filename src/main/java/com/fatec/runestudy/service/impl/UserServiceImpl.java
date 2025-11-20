@@ -55,6 +55,7 @@ public class UserServiceImpl implements UserService {
             user.getNickname(),
             user.getEmail(),
             user.getCurrentAvatar().getIcon(),
+            user.getCurrentAvatar().getIconName(),
             user.getLevel(),
             user.getXpToNextLevel(),
             levelPercentage,
@@ -116,7 +117,7 @@ public class UserServiceImpl implements UserService {
         String hashedPassword = passwordEncoder.encode(request.getPassword());
         Role userRole = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Role padrão não encontrado."));
-        Avatar initialAvatar = avatarRepository.findByName("Pessoa")
+        Avatar initialAvatar = avatarRepository.findByIconName("person")
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Avatar inicial não encontrado."));
 
         User user = new User();
@@ -126,7 +127,7 @@ public class UserServiceImpl implements UserService {
         user.setCurrentAvatar(initialAvatar);
         user.setPassword(hashedPassword);
         user.setRoles(new HashSet<>(Collections.singletonList(userRole)));
-        user.setOwnedAvatars(new HashSet<>());
+        user.setOwnedAvatars(new HashSet<>(Collections.singletonList(initialAvatar)));
 
         userRepository.save(user);
         skillRepository.save(createDefaultSkill(user));
@@ -167,11 +168,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void selectAvatar(User user, String avatarName) {
-        Avatar avatar = avatarRepository.findByName(avatarName)
-            .orElseThrow(() -> new ResourceNotFoundException("Erro: Nenhum avatar encontrado."));
-        
-        user.setCurrentAvatar(avatar);
-        userRepository.save(user);
+        for (Avatar userAvatar : user.getOwnedAvatars()) {
+            if (userAvatar.getIconName().equals(avatarName)) {
+                Avatar avatar = avatarRepository.findByIconName(avatarName)
+                    .orElseThrow(() -> new ResourceNotFoundException("Erro: Nenhum avatar encontrado."));
+
+                user.setCurrentAvatar(avatar);
+                userRepository.save(user);
+                return;
+            }
+        }
+        throw new ResourceNotFoundException("Erro: Usuário não possui avatar para equipar.");
     }
 
     @Transactional

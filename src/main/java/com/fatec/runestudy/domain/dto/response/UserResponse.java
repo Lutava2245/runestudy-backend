@@ -17,7 +17,9 @@ public class UserResponse {
 
     private String email;
 
-    private String currentAvatar;
+    private String currentAvatarIcon;
+
+    private String currentAvatarName;
 
     private int level;
 
