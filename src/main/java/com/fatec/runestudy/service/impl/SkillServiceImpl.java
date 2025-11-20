@@ -31,15 +31,16 @@ public class SkillServiceImpl implements SkillService {
     public SkillResponse convertToDTO(Skill skill) {
         List<Task> tasks = taskRepository.findBySkillId(skill.getId());
 
-        int totalXP = tasks.isEmpty() ? 0 : tasks.stream()
-            .mapToInt(Task::getTaskXP)
-            .sum();
+        int levelPercentage = (skill.getTotalXP() * 100) / skill.getXpToNextLevel();
 
         return new SkillResponse(
             skill.getId(),
             skill.getName(),
             skill.getIcon(),
-            totalXP,
+            skill.getLevel(),
+            skill.getXpToNextLevel(),
+            levelPercentage,
+            skill.getTotalXP(),
             tasks.size());
     }
 
@@ -47,7 +48,7 @@ public class SkillServiceImpl implements SkillService {
     public boolean isOwner(Long skillId, Long userId) {
         Skill skill = skillRepository.findById(skillId)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Habilidade não encontrada."));
-        
+
         return skill.getUser().getId().equals(userId);
     }
 
@@ -68,8 +69,8 @@ public class SkillServiceImpl implements SkillService {
         }
 
         return skills.stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -81,8 +82,8 @@ public class SkillServiceImpl implements SkillService {
         }
 
         return skills.stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -125,5 +126,5 @@ public class SkillServiceImpl implements SkillService {
 
         skillRepository.delete(skill);
     }
-    
+
 }

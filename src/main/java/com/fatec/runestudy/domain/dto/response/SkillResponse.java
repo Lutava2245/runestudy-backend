@@ -13,6 +13,12 @@ public class SkillResponse {
 
     private String icon;
 
+    private int level;
+
+    private int xpToNextLevel;
+
+    private double levelPercentage;
+    
     private int totalXP;
 
     private int totalTasks;
