@@ -29,6 +29,15 @@ public class Skill {
     @Column(nullable = false)
     private String icon;
 
+    @Column
+    private int totalXP = 0;
+
+    @Column
+    private int level = 1;
+
+    @Column
+    private int xpToNextLevel = 90;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
