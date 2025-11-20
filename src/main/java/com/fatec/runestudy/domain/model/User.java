@@ -68,7 +68,7 @@ public class User implements UserDetails {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "user_avatar",
+        name = "user_avatars",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "avatar_id")
     )
@@ -85,8 +85,8 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
-            .map(role -> new SimpleGrantedAuthority(role.getName()))
-            .collect(Collectors.toList());
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toList());
     }
 
     @Override
