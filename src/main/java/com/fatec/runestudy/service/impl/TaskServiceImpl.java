@@ -169,6 +169,7 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
         User user = task.getUser();
+        Skill skill = task.getSkill();
 
         switch (task.getStatus()) {
             case "blocked" -> throw new LockedTaskException("Erro: Tarefa está bloqueada.");
@@ -180,10 +181,22 @@ public class TaskServiceImpl implements TaskService {
         int taskCoins = taskXP/2;
         
         task.setStatus("completed");
+
         user.setTotalXP(user.getTotalXP() + taskXP);
         user.setTotalCoins(user.getTotalCoins() + taskCoins);
+        if (user.getTotalXP() >= user.getXpToNextLevel()) {
+            user.setLevel(user.getLevel() + 1);
+            user.setXpToNextLevel(user.getXpToNextLevel() + (30 * user.getLevel()));
+        }
+
+        skill.setTotalXP(skill.getTotalXP() + taskXP);
+        if (skill.getTotalXP() >= skill.getXpToNextLevel()) {
+            skill.setLevel(skill.getLevel() + 1);
+            skill.setXpToNextLevel(skill.getXpToNextLevel() + (20 * skill.getLevel()));
+        }
 
         userRepository.save(user);
+        skillRepository.save(skill);
         taskRepository.save(task);
         return convertToDTO(task);
     }
