@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @RequestMapping("api/store")
 public class StoreController {
-    
+
     @Autowired
     private AvatarService avatarService;
 
@@ -38,8 +38,8 @@ public class StoreController {
         List<AvatarResponse> avatarsResponse = avatarService.getAllAvatars(user);
         return ResponseEntity.ok(avatarsResponse);
     }
-    
-    @PatchMapping("avatars/{avatarId}/buy")
+
+    @PatchMapping("buy/avatar/{avatarId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> buyAvatar(@AuthenticationPrincipal User user, @PathVariable Long avatarId) {
         storeService.buyAvatar(user, avatarId);
