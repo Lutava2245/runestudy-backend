@@ -12,6 +12,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fatec.runestudy.domain.model.Avatar;
 import com.fatec.runestudy.domain.model.Role;
@@ -71,43 +72,91 @@ public class DataLoader {
     }
 
     private void createAvatars() {
-        Map<String, String> avatarMap = new LinkedHashMap<>();
-        avatarMap.put("Pessoa", "👤");
-        avatarMap.put("Mago Sábio", "🧙");
-        avatarMap.put("Coroa Real", "👑");
-        avatarMap.put("Cavaleiro", "⚔️");
-        avatarMap.put("Escudeiro", "🛡️");
-        avatarMap.put("Arqueiro", "🏹");
-        avatarMap.put("Espadachim", "🗡️");
-        avatarMap.put("Místico", "🔮");
-        avatarMap.put("Domador de Leões", "🦁");
-        avatarMap.put("Trovão", "⚡");
-        avatarMap.put("Estelar", "🌟");
-        avatarMap.put("Caçador de Dragões", "🐉");
-        
-        avatarMap.forEach((name, emoji) -> {
-            if (!avatarRepository.existsByName(name)) {
-                int price = switch (emoji) {
-                    case "👤" -> 0;
-                    case "🧙", "👑" -> 100;
-                    case "⚔️", "🛡️" -> 150;
-                    case "🏹", "🗡️" -> 200;
-                    case "🔮", "🦁" -> 250;
-                    case "⚡" -> 300;
-                    case "🌟" -> 350;
-                    case "🐉" -> 500;
-                    default -> 0;
-                };
-                
-                Avatar avatar = new Avatar();
-                avatar.setName(name);
-                avatar.setIcon(emoji);
-                avatar.setPrice(price);
-                avatarRepository.save(avatar);
-            }
-        });
+        if (avatarRepository.findAll().isEmpty()) {
+            Map<String, String> avatarMap = new LinkedHashMap<>();
+            avatarMap.put("person", "👤");
+            avatarMap.put("wizard", "🧙");
+            avatarMap.put("crown", "👑");
+            avatarMap.put("knight", "⚔️");
+            avatarMap.put("shield", "🛡️");
+            avatarMap.put("bow", "🏹");
+            avatarMap.put("sword", "🗡️");
+            avatarMap.put("crystal", "🔮");
+            avatarMap.put("lion", "🦁");
+            avatarMap.put("lightning", "⚡");
+            avatarMap.put("star", "🌟");
+            avatarMap.put("dragon", "🐉");
+            
+            avatarMap.forEach((name, icon) -> {
+                if (!avatarRepository.existsByIconName(name)) {
+                    Avatar avatar = new Avatar();
+                    avatar.setIcon(icon);
+                    avatar.setIconName(name);
+
+                    switch (icon) {
+                        case "👤" -> {
+                            avatar.setPrice(0);
+                            avatar.setTitle("Pessoa");
+                        }
+                        case "🧙" -> {
+                            avatar.setPrice(100);
+                            avatar.setTitle("Mago Sábio");
+                        }
+                        case "👑" -> {
+                            avatar.setPrice(100);
+                            avatar.setTitle("Coroa Real");
+                        }
+                        case "⚔️" -> {
+                            avatar.setPrice(150);
+                            avatar.setTitle("Cavaleiro");
+                        }
+                        case "🛡️" -> {
+                            avatar.setPrice(150);
+                            avatar.setTitle("Escudeiro");
+                        }
+                        case "🏹" -> {
+                            avatar.setPrice(200);
+                            avatar.setTitle("Arqueiro");
+                        }
+                        case "🗡️" -> {
+                            avatar.setPrice(200);
+                            avatar.setTitle("Espadachim");
+                        }
+                        case "🔮" -> {
+                            avatar.setPrice(250);
+                            avatar.setTitle("Místico");
+                        }
+                        case "🦁" -> {
+                            avatar.setPrice(250);
+                            avatar.setTitle("Domador de Leões");
+                        }
+                        case "⚡" -> {
+                            avatar.setPrice(300);
+                            avatar.setTitle("Trovão");
+                        }
+                        case "🌟" -> {
+                            avatar.setPrice(350);
+                            avatar.setTitle("Estelar");
+                        }
+                        case "🐉" -> {
+                            avatar.setPrice(500);
+                            avatar.setTitle("Caçador de Dragões");
+                        }
+                        default -> {
+                            avatar.setPrice(0);
+                            avatar.setTitle("Desconhecido");
+                        }
+                    };
+                    
+                    avatar.setIconName(name);
+                    avatarRepository.save(avatar);
+                }
+            });
+            System.out.println("Avatares criados com sucesso.");
+        }
     }
 
+    @Transactional
     private void createInitialAdmin() {
         final String ADMIN_EMAIL = "admin@runestudy.com";
 
@@ -123,10 +172,12 @@ public class DataLoader {
                     .orElseThrow(() -> new ResourceNotFoundException("Erro: ROLE_USER não encontrado."));
 
             Avatar adminAvatar = new Avatar();
-            adminAvatar.setName("ADM");
+            adminAvatar.setTitle("Administrador");
+            adminAvatar.setIconName("adm");
             adminAvatar.setIcon("🧑‍💻");
 
             List<Avatar> adminAvatars = avatarRepository.findAll();
+            adminAvatars.add(adminAvatar);
 
             User admin = new User();
             admin.setEmail(ADMIN_EMAIL);
@@ -139,6 +190,8 @@ public class DataLoader {
             Set<Role> roles = new HashSet<>(Arrays.asList(adminRole, userRole));
             admin.setRoles(roles);
 
+            avatarRepository.save(adminAvatar);
+            System.out.println("Avatar do Admin criado com sucesso: " + adminAvatar.getIcon());
             userRepository.save(admin);
             System.out.println("Usuário Admin inicial criado com sucesso: " + ADMIN_EMAIL);
         }
