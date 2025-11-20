@@ -25,11 +25,12 @@ public class AvatarServiceImpl implements AvatarService {
 
     @Override
     public AvatarResponse convertAvatarToDTO(Avatar avatar, User user) {
-        boolean isOwned = user.getOwnedAvatars().contains(avatar);
+        boolean isOwned = isOwned(avatar.getTitle(), user.getId());
 
         return new AvatarResponse(
             avatar.getId(),
-            avatar.getName(),
+            avatar.getTitle(),
+            avatar.getIconName(),
             avatar.getIcon(),
             avatar.getPrice(),
             isOwned);
@@ -37,12 +38,18 @@ public class AvatarServiceImpl implements AvatarService {
 
     @Override
     public boolean isOwned(String name, Long userId) {
-        Avatar avatar = avatarRepository.findByName(name)
+        Avatar avatar = avatarRepository.findByTitle(name)
             .orElseThrow(() -> new ResourceNotFoundException("Erro: Avatar não encontrado."));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Erro: Usuário não encontrado."));
+            .orElseThrow(() -> new ResourceNotFoundException("Erro: Usuário não encontrado."));
 
-        return user.getOwnedAvatars().contains(avatar);
+        boolean owned = false;
+        for (Avatar userAvatar : user.getOwnedAvatars()) {
+            if (userAvatar.getId() == avatar.getId()) {
+                owned = true;
+            }
+        }
+        return owned;
     }
     
     @Override

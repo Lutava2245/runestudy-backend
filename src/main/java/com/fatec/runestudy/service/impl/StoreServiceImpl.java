@@ -1,5 +1,7 @@
 package com.fatec.runestudy.service.impl;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,16 +27,19 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public void buyAvatar(User user, Long avatarId) {
         Avatar avatar = avatarRepository.findById(avatarId)
-            .orElseThrow(() -> new ResourceNotFoundException("Erro: Nenhum avatar encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Nenhum avatar encontrado."));
 
         if (user.getTotalCoins() < avatar.getPrice()) {
             throw new InsufficientCoinsException();
         }
 
+        Set<Avatar> ownedAvatars = user.getOwnedAvatars();
+        ownedAvatars.add(avatar);
+
         user.setTotalCoins(user.getTotalCoins() - avatar.getPrice());
-        user.getOwnedAvatars().add(avatar);
-        
+        user.setOwnedAvatars(ownedAvatars);
+
         userRepository.save(user);
     }
-    
+
 }

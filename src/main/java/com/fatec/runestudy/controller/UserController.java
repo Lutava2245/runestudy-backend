@@ -79,7 +79,7 @@ public class UserController {
     }
 
     @PatchMapping("avatar/{avatarName}")
-    @PreAuthorize("@avatarService.isOwned(#avatarName, principal.id)")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> selectAvatar(@AuthenticationPrincipal User user, @PathVariable String avatarName) {
         userService.selectAvatar(user, avatarName);
         return ResponseEntity.noContent().build();
