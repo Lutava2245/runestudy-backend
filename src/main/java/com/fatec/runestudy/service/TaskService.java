@@ -4,7 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.fatec.runestudy.domain.dto.request.TaskRequest;
+import com.fatec.runestudy.domain.dto.request.TaskCreateRequest;
+import com.fatec.runestudy.domain.dto.request.TaskUpdateRequest;
 import com.fatec.runestudy.domain.dto.response.TaskResponse;
 import com.fatec.runestudy.domain.model.Task;
 import com.fatec.runestudy.domain.model.User;
@@ -26,13 +27,13 @@ public interface TaskService {
 
     List<TaskResponse> getBySkillId(Long skillId);
 
-    TaskResponse createTask(TaskRequest request, User user);
+    void createTask(TaskCreateRequest request, User user);
 
-    TaskResponse updateTaskById(Long id, TaskRequest request);
+    void updateTaskById(Long id, TaskUpdateRequest request);
 
-    TaskResponse toggleTaskBlock(Long id);
+    void toggleTaskBlock(Long id);
 
-    TaskResponse markTaskAsComplete(Long id);
+    void markTaskAsComplete(Long id);
 
     void deleteTaskById(Long id);
 

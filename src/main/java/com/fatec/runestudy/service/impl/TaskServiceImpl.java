@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fatec.runestudy.domain.dto.request.TaskRequest;
+import com.fatec.runestudy.domain.dto.request.TaskCreateRequest;
+import com.fatec.runestudy.domain.dto.request.TaskUpdateRequest;
 import com.fatec.runestudy.domain.dto.response.TaskResponse;
 import com.fatec.runestudy.domain.model.Skill;
 import com.fatec.runestudy.domain.model.Task;
@@ -33,7 +34,6 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponse convertToDTO(Task task) {
-        boolean block = task.getStatus() == "blocked";
         int coins = task.getTaskXP()/2;
 
         return new TaskResponse(
@@ -41,9 +41,9 @@ public class TaskServiceImpl implements TaskService {
             task.getTitle(),
             task.getDescription(),
             task.getStatus(),
-            block,
             task.getTaskXP(),
-            coins);
+            coins,
+            task.getSkill().getName());
     }
 
     @Override
@@ -111,24 +111,29 @@ public class TaskServiceImpl implements TaskService {
 
     @Transactional
     @Override
-    public TaskResponse createTask(TaskRequest request, User user) {
+    public void createTask(TaskCreateRequest request, User user) {
         Skill skill = skillRepository.findByNameAndUser(request.getSkillName(), user)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Habilidade não encontrada."));        
         
+        int taskXP = switch (request.getDifficulty()) {
+            case "medium" -> 30;
+            case "hard" -> 50;
+            default -> 20;
+        };
+
         Task task = new Task();
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
-        task.setTaskXP(request.getTaskXP());
+        task.setTaskXP(taskXP);
         task.setUser(user);
         task.setSkill(skill);
 
         taskRepository.save(task);
-        return convertToDTO(task);
     }
 
     @Transactional
     @Override
-    public TaskResponse updateTaskById(Long id, TaskRequest request) {
+    public void updateTaskById(Long id, TaskUpdateRequest request) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
         
@@ -140,15 +145,13 @@ public class TaskServiceImpl implements TaskService {
 
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
-        task.setTaskXP(request.getTaskXP());
 
         taskRepository.save(task);
-        return convertToDTO(task);
     }
 
     @Transactional
     @Override
-    public TaskResponse toggleTaskBlock(Long id) {
+    public void toggleTaskBlock(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
         
@@ -160,19 +163,17 @@ public class TaskServiceImpl implements TaskService {
         task.setStatus(block ? "pending" : "blocked");
 
         taskRepository.save(task);
-        return convertToDTO(task);
     }
 
     @Transactional
     @Override
-    public TaskResponse markTaskAsComplete(Long id) {
+    public void markTaskAsComplete(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Tarefa não encontrada"));
         User user = task.getUser();
         Skill skill = task.getSkill();
 
         switch (task.getStatus()) {
-            case "blocked" -> throw new LockedTaskException("Erro: Tarefa está bloqueada.");
             case "completed" -> throw new LockedTaskException("Erro: Tarefa já foi completada.");
             default -> {}
         }
@@ -198,7 +199,6 @@ public class TaskServiceImpl implements TaskService {
         userRepository.save(user);
         skillRepository.save(skill);
         taskRepository.save(task);
-        return convertToDTO(task);
     }
     
     @Transactional
@@ -209,7 +209,6 @@ public class TaskServiceImpl implements TaskService {
         
         switch (task.getStatus()) {
             case "blocked" -> throw new LockedTaskException("Erro: Tarefa está bloqueada.");
-            case "completed" -> throw new LockedTaskException("Erro: Tarefa já foi completada.");
             default -> {}
         }
 
