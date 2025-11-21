@@ -31,7 +31,7 @@ public class SkillServiceImpl implements SkillService {
     public SkillResponse convertToDTO(Skill skill) {
         List<Task> tasks = taskRepository.findBySkillId(skill.getId());
 
-        int levelPercentage = (skill.getTotalXP() * 100) / skill.getXpToNextLevel();
+        int levelPercentage = (skill.getProgressXP() * 100) / skill.getXpToNextLevel();
 
         return new SkillResponse(
             skill.getId(),
@@ -40,10 +40,11 @@ public class SkillServiceImpl implements SkillService {
             skill.getLevel(),
             skill.getXpToNextLevel(),
             levelPercentage,
+            skill.getProgressXP(),
             skill.getTotalXP(),
             tasks.size());
     }
-
+    
     @Override
     public boolean isOwner(Long skillId, Long userId) {
         Skill skill = skillRepository.findById(skillId)
@@ -87,7 +88,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public SkillResponse createSkill(SkillRequest request, User user) {
+    public void createSkill(SkillRequest request, User user) {
         if (skillRepository.existsByNameAndUser(request.getName(), user)) {
             throw new DuplicateResourceException("Erro: Habilidade de mesmo nome já existente.");
         }
@@ -98,12 +99,11 @@ public class SkillServiceImpl implements SkillService {
         skill.setUser(user);
 
         skillRepository.save(skill);
-        return convertToDTO(skill);
     }
 
     @Transactional
     @Override
-    public SkillResponse updateSkillById(Long id, SkillRequest request) {
+    public void updateSkillById(Long id, SkillRequest request) {
         Skill skill = skillRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Habilidade não encontrada."));
 
@@ -115,7 +115,6 @@ public class SkillServiceImpl implements SkillService {
         skill.setIcon(request.getIcon());
 
         skillRepository.save(skill);
-        return convertToDTO(skill);
     }
 
     @Transactional

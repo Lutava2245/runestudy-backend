@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse convertToDTO(User user) {
-        double levelPercentage = (user.getTotalXP() * 100) / user.getXpToNextLevel();
+        double levelPercentage = (user.getProgressXP() * 100) / user.getXpToNextLevel();
 
         return new UserResponse(
             user.getId(),
@@ -68,22 +68,9 @@ public class UserServiceImpl implements UserService {
     public Skill createDefaultSkill(User user) {
         Skill skill = new Skill();
         skill.setName("Habilidade Inicial");
-        skill.setIcon("📝");
+        skill.setIcon("notes");
         skill.setUser(user);
         return skill;
-    }
-
-    @Override
-    public void upUserLevel(User user) {
-        if (user.getTotalXP() >= user.getXpToNextLevel()) {
-            int newLevel = user.getLevel() + 1;
-            int newXpToLevel = user.getXpToNextLevel() + (50 * user.getLevel());
-            
-            user.setLevel(newLevel);
-            user.setXpToNextLevel(newXpToLevel);
-
-            userRepository.save(user);
-        }
     }
 
     @Override

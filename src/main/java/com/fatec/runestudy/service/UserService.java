@@ -18,8 +18,6 @@ public interface UserService {
 
     Skill createDefaultSkill(User user);
 
-    void upUserLevel(User user);
-
     UserResponse getById(Long id);
 
     List<UserResponse> getAll();

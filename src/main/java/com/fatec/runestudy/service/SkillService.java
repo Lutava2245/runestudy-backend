@@ -22,9 +22,9 @@ public interface SkillService {
 
     List<SkillResponse> getByUserId(Long id);
 
-    SkillResponse createSkill(SkillRequest request, User user);
+    void createSkill(SkillRequest request, User user);
 
-    SkillResponse updateSkillById(Long id, SkillRequest request);
+    void updateSkillById(Long id, SkillRequest request);
 
     void deleteSkillById(Long id);
     
