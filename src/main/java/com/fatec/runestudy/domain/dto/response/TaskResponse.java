@@ -15,10 +15,10 @@ public class TaskResponse {
 
     private String status;
 
-    private boolean block;
-
     private int taskXP;
 
     private int taskCoins;
+
+    private String skillName;
 
 }

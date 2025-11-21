@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class TaskRequest {
+public class TaskCreateRequest {
     
     @Valid
     @NotBlank
@@ -20,7 +20,7 @@ public class TaskRequest {
 
     @Valid
     @NotNull
-    private int taskXP;
+    private String difficulty;
 
     @Valid
     @NotNull
