@@ -3,6 +3,7 @@ package com.fatec.runestudy.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,23 +48,21 @@ public class SkillController {
     @PreAuthorize("hasRole('ADMIN') or @skillService.isOwner(#id, principal.id)")
     public ResponseEntity<SkillResponse> getSkill(@PathVariable Long id) {
         SkillResponse skillResponse = skillService.getById(id);
-        return skillResponse != null
-            ? ResponseEntity.ok(skillResponse)
-            : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(skillResponse);
     }
     
     @PostMapping("register")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<SkillResponse> registerSkill(@RequestBody SkillRequest requestDTO, @AuthenticationPrincipal User user) {
-        SkillResponse skillResponse = skillService.createSkill(requestDTO, user);
-        return ResponseEntity.ok(skillResponse);
+    public ResponseEntity<Void> registerSkill(@RequestBody SkillRequest requestDTO, @AuthenticationPrincipal User user) {
+        skillService.createSkill(requestDTO, user);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("{id}")
     @PreAuthorize("hasRole('ADMIN') or @skillService.isOwner(#id, principal.id)")
-    public ResponseEntity<SkillResponse> editSkill(@RequestBody SkillRequest requestDTO, @PathVariable Long id) {
-        SkillResponse skillResponse = skillService.updateSkillById(id, requestDTO);
-        return ResponseEntity.ok(skillResponse);
+    public ResponseEntity<Void> editSkill(@RequestBody SkillRequest requestDTO, @PathVariable Long id) {
+        skillService.updateSkillById(id, requestDTO);
+        return ResponseEntity.noContent().build();
     }
     
     @DeleteMapping("{id}")
