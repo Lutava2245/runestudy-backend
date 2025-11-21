@@ -184,14 +184,26 @@ public class TaskServiceImpl implements TaskService {
         task.setStatus("completed");
 
         user.setTotalXP(user.getTotalXP() + taskXP);
+        user.setProgressXP(user.getProgressXP() + taskXP);
         user.setTotalCoins(user.getTotalCoins() + taskCoins);
-        if (user.getTotalXP() >= user.getXpToNextLevel()) {
+        if (user.getProgressXP() >= user.getXpToNextLevel()) {
+            if (user.getProgressXP() > user.getXpToNextLevel()) {
+                user.setProgressXP(user.getProgressXP() - user.getXpToNextLevel());
+            } else {
+                user.setProgressXP(0);
+            }
             user.setLevel(user.getLevel() + 1);
             user.setXpToNextLevel(user.getXpToNextLevel() + (30 * user.getLevel()));
         }
 
         skill.setTotalXP(skill.getTotalXP() + taskXP);
-        if (skill.getTotalXP() >= skill.getXpToNextLevel()) {
+        skill.setProgressXP(skill.getProgressXP() + taskXP);
+        if (skill.getProgressXP() >= skill.getXpToNextLevel()) {
+            if (skill.getProgressXP() > skill.getXpToNextLevel()) {
+                skill.setProgressXP(skill.getProgressXP() - skill.getXpToNextLevel());
+            } else {
+                skill.setProgressXP(0);
+            }
             skill.setLevel(skill.getLevel() + 1);
             skill.setXpToNextLevel(skill.getXpToNextLevel() + (20 * skill.getLevel()));
         }
