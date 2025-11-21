@@ -8,5 +8,7 @@ import com.fatec.runestudy.domain.model.User;
 public interface StoreService {
 
     void buyAvatar(User user, Long avatarId);
+
+    void redeemReward(Long rewardId);
     
 }

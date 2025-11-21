@@ -13,13 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fatec.runestudy.domain.dto.response.AvatarResponse;
 import com.fatec.runestudy.domain.model.User;
 import com.fatec.runestudy.service.AvatarService;
+import com.fatec.runestudy.service.RewardService;
 import com.fatec.runestudy.service.StoreService;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
-// Recompensas	PATCH /api/store/rewards/{id}/redeem
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
@@ -28,6 +27,9 @@ public class StoreController {
 
     @Autowired
     private AvatarService avatarService;
+
+    @Autowired
+    private RewardService rewardService;
 
     @Autowired
     private StoreService storeService;
@@ -43,6 +45,13 @@ public class StoreController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> buyAvatar(@AuthenticationPrincipal User user, @PathVariable Long avatarId) {
         storeService.buyAvatar(user, avatarId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("buy/reward/{rewardId}")
+    @PreAuthorize("isAuthenticated() || @rewardService.isOwner(#rewardId, principal.id)")
+    public ResponseEntity<Void> buyReward(@AuthenticationPrincipal User user, @PathVariable Long rewardId) {
+        storeService.redeemReward(rewardId);
         return ResponseEntity.noContent().build();
     }
 
