@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fatec.runestudy.domain.dto.request.TaskRequest;
+import com.fatec.runestudy.domain.dto.request.TaskCreateRequest;
+import com.fatec.runestudy.domain.dto.request.TaskUpdateRequest;
 import com.fatec.runestudy.domain.dto.response.TaskResponse;
 import com.fatec.runestudy.domain.model.User;
 import com.fatec.runestudy.service.SkillService;
@@ -64,30 +65,30 @@ public class TaskController {
 
     @PostMapping("register")
     @PreAuthorize("hasRole('ADMIN') or @skillService.isOwner(#request.getSkillId(), principal.id)")
-    public ResponseEntity<TaskResponse> registerTask(@RequestBody TaskRequest request, @AuthenticationPrincipal User user) {
-        TaskResponse taskResponse = taskService.createTask(request, user);
-        return ResponseEntity.ok(taskResponse);
+    public ResponseEntity<Void> registerTask(@RequestBody TaskCreateRequest request, @AuthenticationPrincipal User user) {
+        taskService.createTask(request, user);
+        return ResponseEntity.status(201).build();
     }
 
     @PutMapping("{id}")
     @PreAuthorize("hasRole('ADMIN') or @taskService.isOwner(#id, principal.id)")
-    public ResponseEntity<TaskResponse> editTask(@PathVariable Long id, @RequestBody TaskRequest request) {
-        TaskResponse taskResponse = taskService.updateTaskById(id, request);
-        return ResponseEntity.ok(taskResponse);
+    public ResponseEntity<TaskResponse> editTask(@PathVariable Long id, @RequestBody TaskUpdateRequest request) {
+        taskService.updateTaskById(id, request);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("{id}/block")
     @PreAuthorize("hasRole('ADMIN') or @taskService.isOwner(#id, principal.id)")
     public ResponseEntity<TaskResponse> blockTask(@PathVariable Long id) {
-        TaskResponse taskResponse = taskService.toggleTaskBlock(id);
-        return ResponseEntity.ok(taskResponse);
+        taskService.toggleTaskBlock(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("{id}/complete")
     @PreAuthorize("hasRole('ADMIN') or @taskService.isOwner(#id, principal.id)")
     public ResponseEntity<TaskResponse> completeTask(@PathVariable Long id) {
-        TaskResponse taskResponse = taskService.markTaskAsComplete(id);
-        return ResponseEntity.ok(taskResponse);
+        taskService.markTaskAsComplete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("{id}")
