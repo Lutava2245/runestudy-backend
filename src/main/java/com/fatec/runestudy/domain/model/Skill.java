@@ -36,6 +36,9 @@ public class Skill {
     private int level = 1;
 
     @Column
+    private int progressXP;
+
+    @Column
     private int xpToNextLevel = 90;
 
     @ManyToOne

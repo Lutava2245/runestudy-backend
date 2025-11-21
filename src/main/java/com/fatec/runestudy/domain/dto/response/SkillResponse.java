@@ -18,6 +18,8 @@ public class SkillResponse {
     private int xpToNextLevel;
 
     private double levelPercentage;
+
+    private int progressXP;
     
     private int totalXP;
 

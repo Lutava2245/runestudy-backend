@@ -61,6 +61,9 @@ public class User implements UserDetails {
     private int level = 1;
 
     @Column
+    private int progressXP = 0;
+
+    @Column
     private int xpToNextLevel = 150;
 
     @Column
