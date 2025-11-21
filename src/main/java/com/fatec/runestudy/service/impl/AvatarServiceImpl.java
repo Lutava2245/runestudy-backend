@@ -60,9 +60,18 @@ public class AvatarServiceImpl implements AvatarService {
             throw new ResourceNotFoundException("Erro: Nenhum avatar encontrado.");
         }
 
+        boolean isAdmin = user.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            avatars = avatars.stream()
+                    .filter(avatar -> !avatar.getIconName().equals("adm"))
+                    .collect(Collectors.toList());
+        }
+        
         return avatars.stream()
-            .map(avatar -> convertAvatarToDTO(avatar, user))
-            .collect(Collectors.toList());
+                .map(avatar -> convertAvatarToDTO(avatar, user))
+                .collect(Collectors.toList());
     }
 
 }

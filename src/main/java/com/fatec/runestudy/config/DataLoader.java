@@ -206,7 +206,7 @@ public class DataLoader {
             
             Skill skill = new Skill();
             skill.setName(SKILL_NAME);
-            skill.setIcon("🧑‍💻");
+            skill.setIcon("code");
             skill.setUser(adminUser);
 
             skillRepository.save(skill);
