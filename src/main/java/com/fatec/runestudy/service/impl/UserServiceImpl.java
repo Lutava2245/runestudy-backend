@@ -127,16 +127,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Usuário não encontrado."));
 
-        if (!user.getEmail().equals(request.getEmail()) || !user.getNickname().equals(request.getNickname())) {
-            if (userRepository.existsByEmailOrNickname(request.getEmail(), request.getNickname())) {
-                throw new DuplicateResourceException("Erro: Email/Nickname já existentes.");
-            }   
-        }
-        
         user.setName(request.getName());
-        user.setNickname(request.getNickname());
-        user.setEmail(request.getEmail());
-
         userRepository.save(user);
     }
 
