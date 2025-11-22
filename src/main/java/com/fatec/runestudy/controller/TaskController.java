@@ -44,7 +44,7 @@ public class TaskController {
     }
     
     @GetMapping("skill/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @skillService.isOwner(#id, principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @skillServiceImpl.isOwner(#id, principal.id)")
     public ResponseEntity<List<TaskResponse>> getAllTasksBySkill(@PathVariable Long id) {
         List<TaskResponse> taskResponses = taskService.getBySkillId(id);
         return ResponseEntity.ok(taskResponses);
@@ -58,42 +58,42 @@ public class TaskController {
     }
 
     @GetMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN') or @taskService.isOwner(#id, principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @taskServiceImpl.isOwner(#id, principal.id)")
     public ResponseEntity<TaskResponse> getTask(@PathVariable Long id) {
         TaskResponse taskResponse = taskService.getById(id);
         return ResponseEntity.ok(taskResponse);
     }
 
     @PostMapping("register")
-    @PreAuthorize("hasRole('ADMIN') or @skillService.isOwner(#request.getSkillId(), principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @skillServiceImpl.isOwnerByName(#a0.getSkillName(), principal.id)")
     public ResponseEntity<Void> registerTask(@RequestBody TaskCreateRequest request, @AuthenticationPrincipal User user) {
         taskService.createTask(request, user);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN') or @taskService.isOwner(#id, principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @taskServiceImpl.isOwner(#id, principal.id)")
     public ResponseEntity<Void> editTask(@PathVariable Long id, @RequestBody TaskUpdateRequest request) {
         taskService.updateTaskById(id, request);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("{id}/block")
-    @PreAuthorize("hasRole('ADMIN') or @taskService.isOwner(#id, principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @taskServiceImpl.isOwner(#id, principal.id)")
     public ResponseEntity<Void> blockTask(@PathVariable Long id) {
         taskService.toggleTaskBlock(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("{id}/complete")
-    @PreAuthorize("hasRole('ADMIN') or @taskService.isOwner(#id, principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @taskServiceImpl.isOwner(#id, principal.id)")
     public ResponseEntity<Void> completeTask(@PathVariable Long id) {
         taskService.markTaskAsComplete(id);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN') or @taskService.isOwner(#id, principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @taskServiceImpl.isOwner(#id, principal.id)")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         taskService.deleteTaskById(id);
         return ResponseEntity.noContent().build();

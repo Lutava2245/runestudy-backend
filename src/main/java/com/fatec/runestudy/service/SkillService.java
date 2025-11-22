@@ -16,6 +16,8 @@ public interface SkillService {
 
     boolean isOwner(Long skillId, Long userId);
 
+    boolean isOwnerByName(String skillName, Long userId);
+
     SkillResponse getById(Long id);
 
     List<SkillResponse> getAll();

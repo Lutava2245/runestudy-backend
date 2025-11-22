@@ -14,12 +14,16 @@ import com.fatec.runestudy.domain.model.Task;
 import com.fatec.runestudy.domain.model.User;
 import com.fatec.runestudy.domain.repository.SkillRepository;
 import com.fatec.runestudy.domain.repository.TaskRepository;
+import com.fatec.runestudy.domain.repository.UserRepository;
 import com.fatec.runestudy.exception.DuplicateResourceException;
 import com.fatec.runestudy.exception.ResourceNotFoundException;
 import com.fatec.runestudy.service.SkillService;
 
 @Service
 public class SkillServiceImpl implements SkillService {
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private SkillRepository skillRepository;
@@ -48,6 +52,16 @@ public class SkillServiceImpl implements SkillService {
     @Override
     public boolean isOwner(Long skillId, Long userId) {
         Skill skill = skillRepository.findById(skillId)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Habilidade não encontrada."));
+
+        return skill.getUser().getId().equals(userId);
+    }
+
+    @Override
+    public boolean isOwnerByName(String skillName, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Erro: Usuário não encontrado."));
+        Skill skill = skillRepository.findByNameAndUser(skillName, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Habilidade não encontrada."));
 
         return skill.getUser().getId().equals(userId);

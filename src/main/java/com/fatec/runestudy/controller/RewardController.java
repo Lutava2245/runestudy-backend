@@ -45,7 +45,7 @@ public class RewardController {
     }
 
     @GetMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN') or @RewardService.isOwner(#id, principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @rewardServiceImpl.isOwner(#id, principal.id)")
     public ResponseEntity<RewardResponse> getReward(@PathVariable Long id) {
         RewardResponse RewardResponse = rewardService.getById(id);
         return ResponseEntity.ok(RewardResponse);
@@ -59,14 +59,14 @@ public class RewardController {
     }
 
     @PutMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN') or @RewardService.isOwner(#id, principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @rewardServiceImpl.isOwner(#id, principal.id)")
     public ResponseEntity<Void> editReward(@RequestBody RewardRequest requestDTO, @PathVariable Long id) {
         rewardService.updateRewardById(id, requestDTO);
         return ResponseEntity.noContent().build();
     }
     
     @DeleteMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN') or @RewardService.isOwner(#id, principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @rewardServiceImpl.isOwner(#id, principal.id)")
     public ResponseEntity<Void> deleteReward(@PathVariable Long id) {
         rewardService.deleteRewardById(id);
         return  ResponseEntity.noContent().build();

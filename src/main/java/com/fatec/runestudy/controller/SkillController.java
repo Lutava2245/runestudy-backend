@@ -45,7 +45,7 @@ public class SkillController {
     }
 
     @GetMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN') or @skillService.isOwner(#id, principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @skillServiceImpl.isOwner(#id, principal.id)")
     public ResponseEntity<SkillResponse> getSkill(@PathVariable Long id) {
         SkillResponse skillResponse = skillService.getById(id);
         return ResponseEntity.ok(skillResponse);
@@ -59,14 +59,14 @@ public class SkillController {
     }
 
     @PutMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN') or @skillService.isOwner(#id, principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @skillServiceImpl.isOwner(#id, principal.id)")
     public ResponseEntity<Void> editSkill(@RequestBody SkillRequest requestDTO, @PathVariable Long id) {
         skillService.updateSkillById(id, requestDTO);
         return ResponseEntity.noContent().build();
     }
     
     @DeleteMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN') or @skillService.isOwner(#id, principal.id)")
+    @PreAuthorize("hasRole('ADMIN') or @skillServiceImpl.isOwner(#id, principal.id)")
     public ResponseEntity<Void> deleteSkill(@PathVariable Long id) {
         skillService.deleteSkillById(id);
         return  ResponseEntity.noContent().build();
