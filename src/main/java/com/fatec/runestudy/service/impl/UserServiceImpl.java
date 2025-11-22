@@ -59,6 +59,7 @@ public class UserServiceImpl implements UserService {
             user.getLevel(),
             user.getXpToNextLevel(),
             levelPercentage,
+            user.getProgressXP(),
             user.getTotalXP(),
             user.getTotalCoins(),
             user.getCreatedAt());
