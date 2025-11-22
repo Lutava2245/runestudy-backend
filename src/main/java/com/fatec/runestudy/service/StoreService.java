@@ -9,6 +9,6 @@ public interface StoreService {
 
     void buyAvatar(User user, Long avatarId);
 
-    void redeemReward(Long rewardId);
+    void claimReward(Long rewardId);
     
 }

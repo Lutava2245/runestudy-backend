@@ -57,7 +57,7 @@ public class StoreServiceImpl implements StoreService {
 
     @Transactional
     @Override
-    public void redeemReward(Long rewardId) {
+    public void claimReward(Long rewardId) {
         Reward reward = rewardRepository.findById(rewardId)
                 .orElseThrow(() -> new ResourceNotFoundException("Erro: Recompensa não encontrada."));
         User user = reward.getUser();

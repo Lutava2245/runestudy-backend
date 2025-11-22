@@ -50,8 +50,8 @@ public class StoreController {
 
     @PatchMapping("buy/reward/{rewardId}")
     @PreAuthorize("isAuthenticated() || @rewardService.isOwner(#rewardId, principal.id)")
-    public ResponseEntity<Void> buyReward(@AuthenticationPrincipal User user, @PathVariable Long rewardId) {
-        storeService.redeemReward(rewardId);
+    public ResponseEntity<Void> claimReward(@AuthenticationPrincipal User user, @PathVariable Long rewardId) {
+        storeService.claimReward(rewardId);
         return ResponseEntity.noContent().build();
     }
 

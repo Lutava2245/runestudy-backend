@@ -25,7 +25,7 @@ public class RewardServiceImpl implements RewardService {
     public RewardResponse convertToDTO(Reward reward) {
         String status = "available";
         if (reward.isRedeemed()) {
-            status = "redeemed";
+            status = "claimed";
         } else if (reward.getPrice() > reward.getUser().getTotalCoins()) {
             status = "expensive";
         }
